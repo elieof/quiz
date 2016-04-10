@@ -1,0 +1,27 @@
+{
+  "relationships": [
+    {
+      "relationshipId": 1,
+      "relationshipName": "question",
+      "otherEntityName": "question",
+      "relationshipType": "one-to-many",
+      "otherEntityRelationshipName": "quiz"
+    }
+  ],
+  "fields": [
+    {
+      "fieldId": 1,
+      "fieldName": "name",
+      "fieldType": "String"
+    },
+    {
+      "fieldId": 2,
+      "fieldName": "description",
+      "fieldType": "String"
+    }
+  ],
+  "changelogDate": "20160404144829",
+  "dto": "mapstruct",
+  "pagination": "pager",
+  "service": "serviceImpl"
+}

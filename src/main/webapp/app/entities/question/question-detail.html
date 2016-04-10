@@ -1,0 +1,36 @@
+<div >
+    <div class="row">
+        <h2 class="col-xs-6"><span translate="quizApp.question.detail.title">Question</span> {{vm.question.id}}</h2>
+        <h3 class="col-xs-3"><span translate="quizApp.question.level">Level</span> : {{vm.question.level}}</h3>
+        <h3 class="col-xs-3 text-rigth"><span >{{vm.question.topicName}}</span></h3>
+    </div>
+    <hr>
+    <div >
+        <dl class="dl-horizontal">
+            <dt><span translate="quizApp.question.statement">Statement</span></dt>
+            <dd>
+                <span>{{vm.question.statement}}</span>
+            </dd>
+            <hr>
+        </dl>
+        <div class="panel panel-default">
+            <div class="panel-heading"><span translate="quizApp.proposition.home.title">Propositions</span></div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item animate-repeat" ng-repeat="proposition in vm.question.propositions track by proposition.id" ng-class="proposition.valid?'list-group-item-success':''">
+                       <span ><span translate="quizApp.proposition.detail.title">Proposition</span> {{$index}} : </span>
+                       <span >
+                        <span>{{proposition.statement}}</span>
+                       </span>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+        </div>
+    <button type="submit"
+    onclick="window.history.back()"
+    class="btn btn-info">
+    <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span translate="entity.action.back"> Back</span>
+</button>
+</div>

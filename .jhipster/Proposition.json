@@ -1,0 +1,38 @@
+{
+  "relationships": [
+    {
+      "relationshipId": 1,
+      "relationshipName": "question",
+      "otherEntityName": "question",
+      "relationshipType": "many-to-one",
+      "otherEntityField": "id"
+    }
+  ],
+  "fields": [
+    {
+      "fieldId": 1,
+      "fieldName": "statement",
+      "fieldType": "String",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
+      "fieldId": 2,
+      "fieldName": "valid",
+      "fieldType": "Boolean",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
+      "fieldId": 3,
+      "fieldName": "explanation",
+      "fieldType": "String"
+    }
+  ],
+  "changelogDate": "20160404144827",
+  "dto": "mapstruct",
+  "pagination": "pager",
+  "service": "serviceImpl"
+}

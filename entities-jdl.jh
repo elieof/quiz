@@ -1,0 +1,63 @@
+entity Topic {
+  name String required
+}
+
+entity Proposition {
+  statement String required,
+  valid Boolean required,
+  explanation String
+}
+
+entity Question{
+	statement String required,
+    level Integer required
+}
+
+entity Quiz{
+	name String,
+	description String
+}
+
+entity Result{
+	valid Boolean required
+}
+
+relationship ManyToOne {
+  Question{topic} to Topic
+}
+
+relationship OneToMany {
+  Question{proposition} to Proposition
+}
+
+/*
+relationship ManyToOne {
+  Proposition{question} to Question
+}
+*/
+
+relationship OneToMany {
+  Quiz{question} to Question
+}
+
+relationship ManyToOne {
+  Result{quiz} to Quiz
+}
+
+relationship ManyToOne {
+  Result{user} to User
+}
+
+relationship ManyToOne {
+  Result{question} to Question
+}
+
+relationship ManyToOne {
+  Result{proposition} to Proposition
+}
+
+paginate all with pager
+
+dto * with mapstruct
+
+service all with serviceImpl
