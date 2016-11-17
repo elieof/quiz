@@ -1,0 +1,62 @@
+
+<form name="editForm" role="form" novalidate ng-submit="vm.save()" show-validation>
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                ng-click="vm.clear()">&times;</button>
+        <h4 class="modal-title" id="myResultLabel" data-translate="quizApp.result.home.createOrEditLabel">Create or edit a Result</h4>
+    </div>
+    <div class="modal-body">
+        <jhi-alert-error></jhi-alert-error>
+        <div class="form-group" ng-show="vm.result.id">
+            <label for="id" data-translate="global.field.id">ID</label>
+            <input type="text" class="form-control" id="id" name="id"
+                    ng-model="vm.result.id" readonly />
+        </div>
+        <div class="form-group">
+            <label class="control-label" data-translate="quizApp.result.valid" for="field_valid">Valid</label>
+            <input type="checkbox" class="form-control" name="valid" id="field_valid"
+                    ng-model="vm.result.valid"
+                     />
+            <div ng-show="editForm.valid.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.valid.$error.required" data-translate="entity.validation.required">
+                    This field is required.
+                </p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label data-translate="quizApp.result.quiz" for="field_quiz">Quiz</label>
+            <select class="form-control" id="field_quiz" name="quiz" ng-model="vm.result.quizId" ng-options="quiz.id as quiz.id for quiz in vm.quizzes"            >
+                <option value=""></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label data-translate="quizApp.result.user" for="field_user">User</label>
+            <select class="form-control" id="field_user" name="user" ng-model="vm.result.userId" ng-options="user.id as user.id for user in vm.users"            >
+                <option value=""></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label data-translate="quizApp.result.question" for="field_question">Question</label>
+            <select class="form-control" id="field_question" name="question" ng-model="vm.result.questionId" ng-options="question.id as question.id for question in vm.questions"            >
+                <option value=""></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label data-translate="quizApp.result.proposition" for="field_proposition">Proposition</label>
+            <select class="form-control" id="field_proposition" name="proposition" ng-model="vm.result.propositionId" ng-options="proposition.id as proposition.id for proposition in vm.propositions"            >
+                <option value=""></option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="vm.clear()">
+            <span class="glyphicon glyphicon-ban-circle"></span>&nbsp;<span data-translate="entity.action.cancel">Cancel</span>
+        </button>
+        <button type="submit" ng-disabled="editForm.$invalid || vm.isSaving" class="btn btn-primary">
+            <span class="glyphicon glyphicon-save"></span>&nbsp;<span data-translate="entity.action.save">Save</span>
+        </button>
+    </div>
+</form>

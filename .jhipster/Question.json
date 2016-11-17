@@ -1,0 +1,47 @@
+{
+  "relationships": [
+    {
+      "relationshipId": 1,
+      "relationshipName": "topic",
+      "otherEntityName": "topic",
+      "relationshipType": "many-to-one",
+      "otherEntityField": "id"
+    },
+    {
+      "relationshipId": 2,
+      "relationshipName": "proposition",
+      "otherEntityName": "proposition",
+      "relationshipType": "one-to-many",
+      "otherEntityRelationshipName": "question"
+    },
+    {
+      "relationshipId": 3,
+      "relationshipName": "quiz",
+      "otherEntityName": "quiz",
+      "relationshipType": "many-to-one",
+      "otherEntityField": "id"
+    }
+  ],
+  "fields": [
+    {
+      "fieldId": 1,
+      "fieldName": "statement",
+      "fieldType": "String",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
+      "fieldId": 2,
+      "fieldName": "level",
+      "fieldType": "Integer",
+      "fieldValidateRules": [
+        "required"
+      ]
+    }
+  ],
+  "changelogDate": "20160404144828",
+  "dto": "mapstruct",
+  "pagination": "pager",
+  "service": "serviceImpl"
+}

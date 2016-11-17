@@ -1,0 +1,25 @@
+{
+    "quizApp": {
+        "proposition" : {
+            "home": {
+                "title": "Propositions",
+                "createLabel": "Create a new Proposition",
+                "createOrEditLabel": "Create or edit a Proposition",
+                "search": "Search for Proposition"
+            },
+            "created": "A new Proposition is created with identifier {{ param }}",
+            "updated": "A Proposition is updated with identifier {{ param }}",
+            "deleted": "A Proposition is deleted with identifier {{ param }}",
+            "delete": {
+                "question": "Are you sure you want to delete Proposition {{ id }}?"
+            },
+            "detail": {
+                "title": "Proposition"
+            },
+            "statement": "Statement",
+            "valid": "Valid",
+            "explanation": "Explanation",
+            "question": "Question"
+        }
+    }
+}

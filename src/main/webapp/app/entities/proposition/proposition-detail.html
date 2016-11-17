@@ -1,0 +1,35 @@
+
+<div>
+    <h2><span data-translate="quizApp.proposition.detail.title">Proposition</span> {{vm.proposition.id}}</h2>
+    <hr>
+    <jhi-alert-error></jhi-alert-error>
+    <dl class="dl-horizontal jh-entity-details">
+        <dt><span data-translate="quizApp.proposition.statement">Statement</span></dt>
+        <dd>
+            <span>{{vm.proposition.statement}}</span>
+        </dd>
+        <dt><span data-translate="quizApp.proposition.valid">Valid</span></dt>
+        <dd>
+            <span>{{vm.proposition.valid}}</span>
+        </dd>
+        <dt><span data-translate="quizApp.proposition.explanation">Explanation</span></dt>
+        <dd>
+            <span>{{vm.proposition.explanation}}</span>
+        </dd>
+        <dt><span data-translate="quizApp.proposition.question">Question</span></dt>
+        <dd>
+            <a ui-sref="question-detail({id:vm.proposition.questionId})">{{vm.proposition.questionId}}</a>
+        </dd>
+    </dl>
+
+    <button type="submit"
+            ui-sref="{{ vm.previousState }}"
+            class="btn btn-info">
+        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span data-translate="entity.action.back"> Back</span>
+    </button>
+
+    <button type="button" ui-sref="proposition-detail.edit({id:vm.proposition.id})" class="btn btn-primary">
+        <span class="glyphicon glyphicon-pencil"></span>
+        <span class="hidden-xs hidden-sm" data-translate="entity.action.edit"> Edit</span>
+    </button>
+</div>

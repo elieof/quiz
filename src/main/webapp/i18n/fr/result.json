@@ -1,0 +1,26 @@
+{
+    "quizApp": {
+        "result" : {
+            "home": {
+                "title": "Results",
+                "createLabel": "Créer un nouveau Result",
+                "createOrEditLabel": "Créer ou éditer un Result",
+                "search": "Recherche pour Result"
+            },
+            "created": "Un nouveau Result a été créé avec l'identifiant {{ param }}",
+            "updated": "Le Result avec l'identifiant {{ param }} a été mis à jour",
+            "deleted": "Le Result avec l'identifiant {{ param }} a été supprimé",
+            "delete": {
+                "question": "Etes-vous certain de vouloir supprimer le Result {{ id }} ?"
+            },
+            "detail": {
+                "title": "Result"
+            },
+            "valid": "Valid",
+            "quiz": "Quiz",
+            "user": "User",
+            "question": "Question",
+            "proposition": "Proposition"
+        }
+    }
+}

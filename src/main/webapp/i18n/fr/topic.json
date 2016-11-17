@@ -1,0 +1,22 @@
+{
+    "quizApp": {
+        "topic" : {
+            "home": {
+                "title": "Topics",
+                "createLabel": "Créer un nouveau Topic",
+                "createOrEditLabel": "Créer ou éditer un Topic",
+                "search": "Recherche pour Topic"
+            },
+            "created": "Un nouveau Topic a été créé avec l'identifiant {{ param }}",
+            "updated": "Le Topic avec l'identifiant {{ param }} a été mis à jour",
+            "deleted": "Le Topic avec l'identifiant {{ param }} a été supprimé",
+            "delete": {
+                "question": "Etes-vous certain de vouloir supprimer le Topic {{ id }} ?"
+            },
+            "detail": {
+                "title": "Topic"
+            },
+            "name": "Name"
+        }
+    }
+}
