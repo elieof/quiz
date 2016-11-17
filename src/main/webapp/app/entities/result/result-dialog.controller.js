@@ -10,7 +10,7 @@
     function ResultDialogController ($scope, $stateParams, $uibModalInstance, entity, Result, Quiz, User, Question, Proposition) {
         var vm = this;
         vm.result = entity;
-        vm.quizs = Quiz.query();
+        vm.quizzes = Quiz.query();
         vm.users = User.query();
         vm.questions = Question.query();
         vm.propositions = Proposition.query();

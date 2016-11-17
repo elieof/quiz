@@ -168,6 +168,39 @@
                             $state.go('^');
                         });
             }]
+            })
+            .state('question.proposition.new', {
+                parent: 'question',
+                url: '/{id}/proposition/new',
+                data: {
+                    authorities: ['ROLE_USER']
+                },
+                onEnter: ['$stateParams', '$state', '$uibModal', function ($stateParams, $state, $uibModal) {
+                    $uibModal.open({
+                            templateUrl: 'app/entities/proposition/proposition-dialog.html',
+                            controller: 'PropositionDialogController',
+                            controllerAs: 'vm',
+                            backdrop: 'static',
+                            size: 'lg',
+                            resolve: {
+                                entity: function () {
+                                    return {
+                                        statement: null,
+                                        valid: false,
+                                        explanation: null,
+                                        id: $stateParams.id
+                                    };
+                                }
+                            }
+                        })
+                        .result.then(function () {
+                            $state.go('question', null, {
+                                reload: true
+                            });
+                        }, function () {
+                            $state.go('question');
+                        });
+            }]
             });
     }
 

@@ -12,7 +12,7 @@
         vm.question = entity;
         vm.topics = Topic.query();
         vm.propositions = Proposition.query();
-        vm.quizs = Quiz.query();
+        vm.quizzes = Quiz.query();
 
         var onSaveSuccess = function (result) {
             $scope.$emit('quizApp:questionUpdate', result);

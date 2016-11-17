@@ -167,4 +167,26 @@ public class QuestionResource {
         return new ResponseEntity<>(questionMapper.questionsToQuestionDTOs(page.getContent()), headers, HttpStatus.OK);
     }
 
+    /**
+     * GET  /questions/:id/propositions : get the "id" question.
+     *
+     * @param id the id of the questionDTO to retrieve
+     * @return the ResponseEntity with status 200 (OK) and with body the list of propositionDTO, or with status 404 (Not Found)
+     */
+   /* @RequestMapping(value = "/questions/{id}/propositions",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<List<PropositionDTO>> getQuestionPropositions(@PathVariable Long id) {
+        log.debug("REST request to get Question : {}", id);
+        QuestionDTO questionDTO = questionService.findOne(id);
+        return Optional.ofNullable(questionDTO)
+            .map(result -> new ResponseEntity<>(
+                result,
+                HttpStatus.OK))
+            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }*/
+ 
+
+
 }

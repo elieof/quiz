@@ -797,9 +797,6 @@
                                 <fileset>
                                     <directory>target/www/</directory>
                                 </fileset>
-                                <fileset>
-                                    <directory>node_modules</directory>
-                                </fileset>
                             </filesets>
                         </configuration>
                     </plugin>

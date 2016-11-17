@@ -1,0 +1,26 @@
+<from name="editForm" role="form" novalidate ng-submit="vm.save()" show-validation>
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" 
+		area-hidden="true" ng-click="vm.clear()">&times;</button>
+		<h4 class="modal-title" id="myPropositionLabel" tranlate="quizApp.proposition.home.createOrEditLabel">Create or edit edit a Proposition</h4>
+	</div>
+	<div class="modal-body">
+		<jhi-alert-error></jhi-alert-error>
+		<div class="form-group">
+			<label for="field_statement" translate="quizApp.proposition.statement" class="control-label">Statement</label>
+			<input type="text" class="form-control" name="statement" id="field_statement" ng-model="vm.proposition.statement" required />
+			<div ng-show="editForm.statement.$invalid">
+				<p class="help-block" ng-show="editForm.statement.$error.required" translate="entity.validation.required">This field is required
+				</p>				
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label" for="field_valid" translate="quizApp.proposition.valid"> Valid</label>
+			<input type="checkbox" name="valid" class="from-control" id="field_valid" ng-model="vm.proposition.valid"/>
+			<div>
+				<p class="help-block">This field is required</p>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer"></div>
+</from>
