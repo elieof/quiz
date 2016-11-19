@@ -17,6 +17,7 @@ public class QuestionDTO implements Serializable {
     @NotNull
     private String statement;
 
+
     @NotNull
     private Integer level;
 

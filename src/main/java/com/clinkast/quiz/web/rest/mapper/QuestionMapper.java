@@ -20,6 +20,7 @@ public interface QuestionMapper {
     List<QuestionDTO> questionsToQuestionDTOs(List<Question> questions);
 
     @Mapping(source = "topicId", target = "topic")
+    @Mapping(target = "propositions", ignore = true)
     @Mapping(source = "quizId", target = "quiz")
     Question questionDTOToQuestion(QuestionDTO questionDTO);
 

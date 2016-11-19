@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface ResultRepository extends JpaRepository<Result,Long> {
 
-    @Query("select result from Result result where result.user.login = ?#{principal}")
+    @Query("select result from Result result where result.user.login = ?#{principal.username}")
     List<Result> findByUserIsCurrentUser();
 
 }

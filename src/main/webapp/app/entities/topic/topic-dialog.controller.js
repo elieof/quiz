@@ -10,6 +10,11 @@
     function TopicDialogController ($scope, $stateParams, $uibModalInstance, entity, Topic) {
         var vm = this;
         vm.topic = entity;
+        vm.load = function(id) {
+            Topic.get({id : id}, function(result) {
+                vm.topic = result;
+            });
+        };
 
         var onSaveSuccess = function (result) {
             $scope.$emit('quizApp:topicUpdate', result);

@@ -1,5 +1,9 @@
 package com.clinkast.quiz.web.rest.mapper;
 
+import com.clinkast.quiz.domain.*;
+import com.clinkast.quiz.web.rest.dto.PropositionDTO;
+
+import org.mapstruct.*;
 import java.util.List;
 import java.util.Set;
 

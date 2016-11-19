@@ -11,6 +11,11 @@
         var vm = this;
         vm.quiz = entity;
         vm.questions = Question.query();
+        vm.load = function(id) {
+            Quiz.get({id : id}, function(result) {
+                vm.quiz = result;
+            });
+        };
 
         var onSaveSuccess = function (result) {
             $scope.$emit('quizApp:quizUpdate', result);

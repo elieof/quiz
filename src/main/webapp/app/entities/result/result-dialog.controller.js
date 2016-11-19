@@ -10,10 +10,15 @@
     function ResultDialogController ($scope, $stateParams, $uibModalInstance, entity, Result, Quiz, User, Question, Proposition) {
         var vm = this;
         vm.result = entity;
-        vm.quizzes = Quiz.query();
+        vm.quizs = Quiz.query();
         vm.users = User.query();
         vm.questions = Question.query();
         vm.propositions = Proposition.query();
+        vm.load = function(id) {
+            Result.get({id : id}, function(result) {
+                vm.result = result;
+            });
+        };
 
         var onSaveSuccess = function (result) {
             $scope.$emit('quizApp:resultUpdate', result);

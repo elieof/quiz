@@ -38,9 +38,8 @@
                     <th jh-sort-by="id"><span translate="global.field.id">ID</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th jh-sort-by="statement"><span translate="quizApp.question.statement">Statement</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th jh-sort-by="level"><span translate="quizApp.question.level">Level</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="topicId"><span translate="quizApp.question.topic">Topic</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="quizId"><span translate="quizApp.question.quiz">Quiz</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th><span translate="quizApp.proposition.answers">Réponses</span></th>
+                    <th jh-sort-by="topicId"><span translate="quizApp.question.topic">topic</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="quizId"><span translate="quizApp.question.quiz">quiz</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th></th>
                 </tr>
             </thead>
@@ -50,18 +49,10 @@
                     <td>{{question.statement}}</td>
                     <td>{{question.level}}</td>
                     <td>
-                        <a ui-sref="topic-detail({id:question.topicId})">{{question.topicName}}</a>
+                        <a ui-sref="topic-detail({id:question.topicId})">{{question.topicId}}</a>
                     </td>
                     <td>
                         <a ui-sref="quiz-detail({id:question.quizId})">{{question.quizId}}</a>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary" ui-sref="proposition.new" >
-                    <span class="glyphicon glyphicon-plus"></span>
-                    <span class="hidden-xs"  translate="quizApp.question.home.createLabel">
-                        Create new Question
-                    </span>
-                </button>
                     </td>
                     <td class="text-right">
                         <div class="btn-group flex-btn-group-container">

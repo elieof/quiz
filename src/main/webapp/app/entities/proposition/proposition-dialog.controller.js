@@ -11,6 +11,11 @@
         var vm = this;
         vm.proposition = entity;
         vm.questions = Question.query();
+        vm.load = function(id) {
+            Proposition.get({id : id}, function(result) {
+                vm.proposition = result;
+            });
+        };
 
         var onSaveSuccess = function (result) {
             $scope.$emit('quizApp:propositionUpdate', result);

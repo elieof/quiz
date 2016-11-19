@@ -1,6 +1,6 @@
 {
     "quizApp": {
-        "proposition": {
+        "proposition" : {
             "home": {
                 "title": "Propositions",
                 "createLabel": "Créer un nouveau Proposition",
@@ -19,9 +19,7 @@
             "statement": "Statement",
             "valid": "Valid",
             "explanation": "Explanation",
-            "question": "Question",
-            "answers": "Réponses",
-            "answer": "Réponse"
+            "question": "Question"
         }
     }
 }

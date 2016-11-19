@@ -7,8 +7,8 @@
     "serverPort": "8080",
     "authenticationType": "jwt",
     "hibernateCache": "ehcache",
-    "clusteredHttpSession": "no",
-    "websocket": "no",
+    "clusteredHttpSession": false,
+    "websocket": false,
     "databaseType": "sql",
     "devDatabaseType": "mysql",
     "prodDatabaseType": "mysql",
@@ -29,6 +29,8 @@
     "languages": [
       "fr",
       "en"
-    ]
+    ],
+    "messageBroker": false,
+    "serviceDiscoveryType": false
   }
 }

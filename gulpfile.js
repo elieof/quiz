@@ -1,4 +1,4 @@
-// Generated on 2016-04-11 using generator-jhipster 3.0.0
+// Generated on 2016-11-19 using generator-jhipster 3.0.0
 'use strict';
 
 var gulp = require('gulp'),
@@ -120,7 +120,12 @@ gulp.task('wiredep', ['wiredep:test', 'wiredep:app']);
 gulp.task('wiredep:app', function () {
     var stream = gulp.src(config.app + 'index.html')
         .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(wiredep())
+        .pipe(wiredep({
+            exclude: [
+                /angular-i18n/,  // localizations are loaded dynamically
+                'bower_components/bootstrap-sass/assets/javascripts/' // Exclude Bootstrap js files as we use ui-bootstrap
+            ]
+        }))
         .pipe(gulp.dest(config.app));
 
     return es.merge(stream, gulp.src(config.sassSrc)
@@ -135,6 +140,11 @@ gulp.task('wiredep:test', function () {
     return gulp.src(config.test + 'karma.conf.js')
         .pipe(plumber({errorHandler: handleErrors}))
         .pipe(wiredep({
+            exclude: [
+                /angular-i18n/,  // localizations are loaded dynamically
+                /angular-scenario/,
+                'bower_components/bootstrap-sass/assets/javascripts/' // Exclude Bootstrap js files as we use ui-bootstrap
+            ],
             ignorePath: /\.\.\/\.\.\//, // remove ../../ from paths of injected JavaScript files
             devDependencies: true,
             fileTypes: {

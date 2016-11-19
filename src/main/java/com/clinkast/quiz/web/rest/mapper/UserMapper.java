@@ -40,7 +40,7 @@ public interface UserMapper {
         return user;
     }
 
-    default Set<String> stringsFromAuthorities (Set<Authority> authorities) {
+    default Set<String> stringsFromAuthorities (Set < Authority > authorities) {
         return authorities.stream().map(Authority::getName)
             .collect(Collectors.toSet());
     }

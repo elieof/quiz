@@ -43,14 +43,14 @@
         </div>
 
         <div class="form-group">
-            <label translate="quizApp.question.topic" for="field_topic">Topic</label>
-            <select class="form-control" id="field_topic" name="topic" ng-model="vm.question.topicId" ng-options="topic.id as topic.name for topic in vm.topics">
+            <label translate="quizApp.question.topic" for="field_topic">topic</label>
+            <select class="form-control" id="field_topic" name="topic" ng-model="vm.question.topicId" ng-options="topic.id as topic.id for topic in vm.topics">
                 <option value=""></option>
             </select>
         </div>
         <div class="form-group">
-            <label translate="quizApp.question.quiz" for="field_quiz">Quiz</label>
-            <select class="form-control" id="field_quiz" name="quiz" ng-model="vm.question.quizId" ng-options="quiz.id as quiz.name for quiz in vm.quizs">
+            <label translate="quizApp.question.quiz" for="field_quiz">quiz</label>
+            <select class="form-control" id="field_quiz" name="quiz" ng-model="vm.question.quizId" ng-options="quiz.id as quiz.id for quiz in vm.quizs">
                 <option value=""></option>
             </select>
         </div>

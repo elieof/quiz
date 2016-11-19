@@ -11,8 +11,4 @@
     <include file="classpath:config/liquibase/changelog/20160404144829_added_entity_Quiz.xml" relativeToChangelogFile="false"/>
     <include file="classpath:config/liquibase/changelog/20160404144830_added_entity_Result.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
-    <include file="classpath:config/liquibase/changelog/20160404144827_added_entity_constraints_Proposition.xml" relativeToChangelogFile="false"/>
-    <include file="classpath:config/liquibase/changelog/20160404144828_added_entity_constraints_Question.xml" relativeToChangelogFile="false"/>
-    <include file="classpath:config/liquibase/changelog/20160404144830_added_entity_constraints_Result.xml" relativeToChangelogFile="false"/>
-    <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
 </databaseChangeLog>

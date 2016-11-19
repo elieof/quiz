@@ -17,13 +17,15 @@ public class PropositionDTO implements Serializable {
     @NotNull
     private String statement;
 
+
     @NotNull
     private Boolean valid;
 
+
     private String explanation;
 
-    private Long questionId;
 
+    private Long questionId;
     public Long getId() {
         return id;
     }

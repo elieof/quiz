@@ -6,7 +6,7 @@ import com.clinkast.quiz.config.JHipsterProperties;
 import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +28,7 @@ import static springfox.documentation.builders.PathSelectors.regex;
  */
 @Configuration
 @EnableSwagger2
-@Profile("!" + Constants.SPRING_PROFILE_NO_SWAGGER)
-@ConditionalOnProperty(prefix="jhipster.swagger", name="enabled")
+@ConditionalOnExpression("#{!environment.acceptsProfiles('" + Constants.SPRING_PROFILE_NO_SWAGGER + "') && !environment.acceptsProfiles('" + Constants.SPRING_PROFILE_PRODUCTION + "')}")
 public class SwaggerConfiguration {
 
     private final Logger log = LoggerFactory.getLogger(SwaggerConfiguration.class);
