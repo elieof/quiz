@@ -1,12 +1,12 @@
 <div>
-    <h2 data-translate="quizApp.proposition.home.title">Propositions</h2>
+    <h2 translate="quizApp.proposition.home.title">Propositions</h2>
     <jhi-alert></jhi-alert>
     <div class="container-fluid">
         <div class="row">
             <div class="col-xs-4 no-padding-left">
                 <button class="btn btn-primary" ui-sref="proposition.new" >
                     <span class="glyphicon glyphicon-plus"></span>
-                    <span class="hidden-xs"  data-translate="quizApp.proposition.home.createLabel">
+                    <span class="hidden-xs"  translate="quizApp.proposition.home.createLabel">
                         Create new Proposition
                     </span>
                 </button>
@@ -35,11 +35,11 @@
         <table class="jh-table table table-striped">
             <thead>
                 <tr jh-sort="vm.predicate" ascending="vm.reverse" callback="vm.transition()">
-                    <th jh-sort-by="id"><span data-translate="global.field.id">ID</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="statement"><span data-translate="quizApp.proposition.statement">Statement</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="valid"><span data-translate="quizApp.proposition.valid">Valid</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="explanation"><span data-translate="quizApp.proposition.explanation">Explanation</span> <span class="glyphicon glyphicon-sort"></span></th>
-                    <th jh-sort-by="questionId"><span data-translate="quizApp.proposition.question">Question</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="id"><span translate="global.field.id">ID</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="statement"><span translate="quizApp.proposition.statement">Statement</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="valid"><span translate="quizApp.proposition.valid">Valid</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="explanation"><span translate="quizApp.proposition.explanation">Explanation</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="questionId"><span translate="quizApp.proposition.question">question</span> <span class="glyphicon glyphicon-sort"></span></th>
                     <th></th>
                 </tr>
             </thead>
@@ -58,19 +58,19 @@
                                     ui-sref="proposition-detail({id:proposition.id})"
                                     class="btn btn-info btn-sm">
                                 <span class="glyphicon glyphicon-eye-open"></span>
-                                <span class="hidden-xs hidden-sm" data-translate="entity.action.view"></span>
+                                <span class="hidden-xs hidden-sm" translate="entity.action.view"></span>
                             </button>
                             <button type="submit"
                                     ui-sref="proposition.edit({id:proposition.id})"
                                     class="btn btn-primary btn-sm">
                                 <span class="glyphicon glyphicon-pencil"></span>
-                                <span class="hidden-xs hidden-sm" data-translate="entity.action.edit"></span>
+                                <span class="hidden-xs hidden-sm" translate="entity.action.edit"></span>
                             </button>
                             <button type="submit"
                                     ui-sref="proposition.delete({id:proposition.id})"
                                     class="btn btn-danger btn-sm">
                                 <span class="glyphicon glyphicon-remove-circle"></span>
-                                <span class="hidden-xs hidden-sm" data-translate="entity.action.delete"></span>
+                                <span class="hidden-xs hidden-sm" translate="entity.action.delete"></span>
                             </button>
                         </div>
                     </td>
@@ -79,7 +79,7 @@
         </table>
     </div>
     <div class="text-center">
-        <jhi-item-count page="vm.page" total="vm.queryCount" items-per-page="vm.itemsPerPage"></jhi-item-count>
+        <jhi-item-count page="vm.page" total="vm.queryCount"></jhi-item-count>
     </div>
     <uib-pager total-items="vm.totalItems" ng-model="vm.page" ng-change="vm.transition()"></uib-pager>
 </div>

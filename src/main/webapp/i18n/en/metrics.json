@@ -75,10 +75,11 @@
             "objects": "Objects",
             "hits": "Hits",
             "misses": "Misses",
-            "evictioncount": "Eviction count"
+            "evictioncount": "Eviction count",
+            "mean": "Mean get time (ms)"
         },
         "datasource": {
-            "usage": "Usage",
+        	"usage": "Usage",
             "title": "DataSource statistics (time in millisecond)",
             "name": "Pool usage",
             "count": "Count",

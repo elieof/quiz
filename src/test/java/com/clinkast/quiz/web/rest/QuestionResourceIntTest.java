@@ -1,48 +1,52 @@
 package com.clinkast.quiz.web.rest;
 
 import com.clinkast.quiz.QuizApp;
-
 import com.clinkast.quiz.domain.Question;
 import com.clinkast.quiz.repository.QuestionRepository;
 import com.clinkast.quiz.service.QuestionService;
 import com.clinkast.quiz.repository.search.QuestionSearchRepository;
-import com.clinkast.quiz.service.dto.QuestionDTO;
-import com.clinkast.quiz.service.mapper.QuestionMapper;
+import com.clinkast.quiz.web.rest.dto.QuestionDTO;
+import com.clinkast.quiz.web.rest.mapper.QuestionMapper;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.hasItem;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.IntegrationTest;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
 /**
  * Test class for the QuestionResource REST controller.
  *
  * @see QuestionResource
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = QuizApp.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = QuizApp.class)
+@WebAppConfiguration
+@IntegrationTest
 public class QuestionResourceIntTest {
 
-    private static final String DEFAULT_STATEMENT = "AAAAAAAAAA";
-    private static final String UPDATED_STATEMENT = "BBBBBBBBBB";
+    private static final String DEFAULT_STATEMENT = "AAAAA";
+    private static final String UPDATED_STATEMENT = "BBBBB";
 
     private static final Integer DEFAULT_LEVEL = 1;
     private static final Integer UPDATED_LEVEL = 2;
@@ -65,40 +69,27 @@ public class QuestionResourceIntTest {
     @Inject
     private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
 
-    @Inject
-    private EntityManager em;
-
     private MockMvc restQuestionMockMvc;
 
     private Question question;
 
-    @Before
+    @PostConstruct
     public void setup() {
         MockitoAnnotations.initMocks(this);
         QuestionResource questionResource = new QuestionResource();
         ReflectionTestUtils.setField(questionResource, "questionService", questionService);
+        ReflectionTestUtils.setField(questionResource, "questionMapper", questionMapper);
         this.restQuestionMockMvc = MockMvcBuilders.standaloneSetup(questionResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setMessageConverters(jacksonMessageConverter).build();
     }
 
-    /**
-     * Create an entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
-     */
-    public static Question createEntity(EntityManager em) {
-        Question question = new Question();
-        question.setStatement(DEFAULT_STATEMENT);
-        question.setLevel(DEFAULT_LEVEL);
-        return question;
-    }
-
     @Before
     public void initTest() {
         questionSearchRepository.deleteAll();
-        question = createEntity(em);
+        question = new Question();
+        question.setStatement(DEFAULT_STATEMENT);
+        question.setLevel(DEFAULT_LEVEL);
     }
 
     @Test
@@ -173,7 +164,7 @@ public class QuestionResourceIntTest {
         // Get all the questions
         restQuestionMockMvc.perform(get("/api/questions?sort=id,desc"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.[*].id").value(hasItem(question.getId().intValue())))
                 .andExpect(jsonPath("$.[*].statement").value(hasItem(DEFAULT_STATEMENT.toString())))
                 .andExpect(jsonPath("$.[*].level").value(hasItem(DEFAULT_LEVEL)));
@@ -188,7 +179,7 @@ public class QuestionResourceIntTest {
         // Get the question
         restQuestionMockMvc.perform(get("/api/questions/{id}", question.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").value(question.getId().intValue()))
             .andExpect(jsonPath("$.statement").value(DEFAULT_STATEMENT.toString()))
             .andExpect(jsonPath("$.level").value(DEFAULT_LEVEL));
@@ -211,7 +202,8 @@ public class QuestionResourceIntTest {
         int databaseSizeBeforeUpdate = questionRepository.findAll().size();
 
         // Update the question
-        Question updatedQuestion = questionRepository.findOne(question.getId());
+        Question updatedQuestion = new Question();
+        updatedQuestion.setId(question.getId());
         updatedQuestion.setStatement(UPDATED_STATEMENT);
         updatedQuestion.setLevel(UPDATED_LEVEL);
         QuestionDTO questionDTO = questionMapper.questionToQuestionDTO(updatedQuestion);
@@ -265,7 +257,7 @@ public class QuestionResourceIntTest {
         // Search the question
         restQuestionMockMvc.perform(get("/api/_search/questions?query=id:" + question.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.[*].id").value(hasItem(question.getId().intValue())))
             .andExpect(jsonPath("$.[*].statement").value(hasItem(DEFAULT_STATEMENT.toString())))
             .andExpect(jsonPath("$.[*].level").value(hasItem(DEFAULT_LEVEL)));

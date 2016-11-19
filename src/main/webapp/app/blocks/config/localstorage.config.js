@@ -5,10 +5,9 @@
         .module('quizApp')
         .config(localStorageConfig);
 
-    localStorageConfig.$inject = ['$localStorageProvider', '$sessionStorageProvider'];
+    localStorageConfig.$inject = ['$localStorageProvider'];
 
-    function localStorageConfig($localStorageProvider, $sessionStorageProvider) {
+    function localStorageConfig($localStorageProvider) {
         $localStorageProvider.setKeyPrefix('jhi-');
-        $sessionStorageProvider.setKeyPrefix('jhi-');
     }
 })();

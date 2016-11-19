@@ -1,6 +1,6 @@
 package com.clinkast.quiz.config;
 
-import org.apache.commons.lang3.CharEncoding;
+import org.apache.commons.lang.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.*;
@@ -9,7 +9,6 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 @Configuration
 public class ThymeleafConfiguration {
 
-    @SuppressWarnings("unused")
     private final Logger log = LoggerFactory.getLogger(ThymeleafConfiguration.class);
 
     @Bean

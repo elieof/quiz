@@ -1,21 +1,10 @@
 // Karma configuration
-// http://karma-runner.github.io/0.13/config/configuration-file.html
-
-var sourcePreprocessors = ['coverage'];
-
-function isDebug() {
-    return process.argv.indexOf('--debug') >= 0;
-}
-
-if (isDebug()) {
-    // Disable JS minification if Karma is run with debug option.
-    sourcePreprocessors = [];
-}
+// http://karma-runner.github.io/0.10/config/configuration-file.html
 
 module.exports = function (config) {
     config.set({
         // base path, that will be used to resolve files and exclude
-        basePath: 'src/test/javascript/'.replace(/[^/]+/g, '..'),
+        basePath: 'src/test/javascript/'.replace(/[^/]+/g,'..'),
 
         // testing framework to use (jasmine/mocha/qunit/...)
         frameworks: ['jasmine'],
@@ -38,16 +27,18 @@ module.exports = function (config) {
         exclude: ['src/test/javascript/e2e/**'],
 
         preprocessors: {
-            './**/*.js': sourcePreprocessors
+            './**/*.js': ['coverage']
         },
 
-        reporters: ['dots', 'junit', 'coverage', 'progress'],
+        reporters: ['dots', 'jenkins', 'coverage', 'progress'],
 
-        junitReporter: {
-            outputFile: '../target/test-results/karma/TESTS-results.xml'
+        jenkinsReporter: {
+            
+            outputFile: 'target/test-results/karma/TESTS-results.xml'
         },
 
         coverageReporter: {
+            
             dir: 'target/test-results/coverage',
             reporters: [
                 {type: 'lcov', subdir: 'report-lcov'}
@@ -79,8 +70,8 @@ module.exports = function (config) {
         singleRun: false,
 
         // to avoid DISCONNECTED messages when connecting to slow virtual machines
-        browserDisconnectTimeout: 10000, // default 2000
-        browserDisconnectTolerance: 1, // default 0
-        browserNoActivityTimeout: 4 * 60 * 1000 //default 10000
+        browserDisconnectTimeout : 10000, // default 2000
+        browserDisconnectTolerance : 1, // default 0
+        browserNoActivityTimeout : 4*60*1000 //default 10000
     });
 };

@@ -2,11 +2,19 @@ package com.clinkast.quiz.config;
 
 import com.clinkast.quiz.config.liquibase.AsyncSpringLiquibase;
 
+import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
+import com.zaxxer.hikari.HikariDataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -18,6 +26,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
+import java.util.Arrays;
 
 @Configuration
 @EnableJpaRepositories("com.clinkast.quiz.repository")
@@ -31,8 +40,38 @@ public class DatabaseConfiguration {
     @Inject
     private Environment env;
 
+    @Autowired(required = false)
+    private MetricRegistry metricRegistry;
+
+    @Bean(destroyMethod = "close")
+    @ConditionalOnExpression("#{!environment.acceptsProfiles('" + Constants.SPRING_PROFILE_CLOUD + "') && !environment.acceptsProfiles('" + Constants.SPRING_PROFILE_HEROKU + "')}")
+    @ConfigurationProperties(prefix = "spring.datasource.hikari")
+    public DataSource dataSource(DataSourceProperties dataSourceProperties) {
+        log.debug("Configuring Datasource");
+        if (dataSourceProperties.getUrl() == null) {
+            log.error("Your database connection pool configuration is incorrect! The application" +
+                    " cannot start. Please check your Spring profile, current profiles are: {}",
+                Arrays.toString(env.getActiveProfiles()));
+
+            throw new ApplicationContextException("Database connection pool is not configured correctly");
+        }
+        HikariDataSource hikariDataSource =  (HikariDataSource) DataSourceBuilder
+                .create(dataSourceProperties.getClassLoader())
+                .type(HikariDataSource.class)
+                .driverClassName(dataSourceProperties.getDriverClassName())
+                .url(dataSourceProperties.getUrl())
+                .username(dataSourceProperties.getUsername())
+                .password(dataSourceProperties.getPassword())
+                .build();
+
+        if (metricRegistry != null) {
+            hikariDataSource.setMetricRegistry(metricRegistry);
+        }
+        return hikariDataSource;
+    }
     @Bean
-    public SpringLiquibase liquibase(DataSource dataSource, LiquibaseProperties liquibaseProperties) {
+    public SpringLiquibase liquibase(DataSource dataSource, DataSourceProperties dataSourceProperties,
+        LiquibaseProperties liquibaseProperties) {
 
         // Use liquibase.integration.spring.SpringLiquibase if you don't want Liquibase to start asynchronously
         SpringLiquibase liquibase = new AsyncSpringLiquibase();
@@ -47,6 +86,7 @@ public class DatabaseConfiguration {
             liquibase.setShouldRun(liquibaseProperties.isEnabled());
             log.debug("Configuring Liquibase");
         }
+
         return liquibase;
     }
 

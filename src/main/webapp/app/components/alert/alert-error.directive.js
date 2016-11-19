@@ -9,7 +9,7 @@
                   '</div>',
         controller: jhiAlertErrorController
     };
-
+    
     angular
         .module('quizApp')
         .component('jhiAlertError', jhiAlertError);
@@ -22,7 +22,7 @@
         vm.alerts = [];
 
         function addErrorAlert (message, key, data) {
-            key = key ? key : message;
+            key = key && key !== null ? key : message;
             vm.alerts.push(
                 AlertService.add(
                     {
@@ -66,10 +66,6 @@
                 } else {
                     addErrorAlert(httpResponse.data);
                 }
-                break;
-
-            case 404:
-                addErrorAlert('Not found','error.url.not.found');
                 break;
 
             default:

@@ -16,7 +16,7 @@
     <!--
         Added the entity Quiz.
     -->
-    <changeSet id="20160404144829-1" author="jhipster">
+    <changeSet id="20160404144829" author="jhipster">
         <createTable tableName="quiz">
             <column name="id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>

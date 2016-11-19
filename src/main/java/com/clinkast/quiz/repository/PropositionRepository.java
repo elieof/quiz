@@ -9,7 +9,6 @@ import java.util.List;
 /**
  * Spring Data JPA repository for the Proposition entity.
  */
-@SuppressWarnings("unused")
 public interface PropositionRepository extends JpaRepository<Proposition,Long> {
 
 }

@@ -5,11 +5,13 @@
         .module('quizApp')
         .config(compileServiceConfig);
 
-    compileServiceConfig.$inject = ['$compileProvider','DEBUG_INFO_ENABLED'];
+    compileServiceConfig.$inject = ['$compileProvider', 'ENV'];
 
-    function compileServiceConfig($compileProvider,DEBUG_INFO_ENABLED) {
+    function compileServiceConfig($compileProvider, ENV) {
         // disable debug data on prod profile to improve performance
-        $compileProvider.debugInfoEnabled(DEBUG_INFO_ENABLED);
+        if(ENV === 'prod'){
+            $compileProvider.debugInfoEnabled(false);
+        }
 
         /*
         If you wish to debug an application with this information

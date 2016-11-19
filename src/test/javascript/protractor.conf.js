@@ -1,20 +1,11 @@
-const os = require('os');
+var HtmlScreenshotReporter = require("protractor-jasmine2-screenshot-reporter");
+var JasmineReporters = require('jasmine-reporters');
 
-const HtmlScreenshotReporter = require("protractor-jasmine2-screenshot-reporter");
-const JasmineReporters = require('jasmine-reporters');
-
-const prefix = 'src/test/javascript/'.replace(/[^/]+/g,'..');
-
-var webbrowserDriver= '';
-if (os.platform() === 'win32') {
-    webbrowserDriver = prefix + 'node_modules/protractor/node_modules/webdriver-manager/selenium/chromedriver_2.22.exe';
-} else {
-    webbrowserDriver = prefix + 'node_modules/protractor/node_modules/webdriver-manager/selenium/chromedriver_2.22';
-}
+var prefix = 'src/test/javascript/'.replace(/[^/]+/g,'..');
 
 exports.config = {
-    seleniumServerJar: prefix + 'node_modules/protractor/node_modules/webdriver-manager/selenium/selenium-server-standalone-2.53.1.jar',
-    chromeDriver: webbrowserDriver,
+    seleniumServerJar: prefix + 'node_modules/protractor/selenium/selenium-server-standalone-2.47.1.jar',
+    chromeDriver: prefix + 'node_modules/protractor/selenium/chromedriver',
     allScriptsTimeout: 20000,
 
     suites: {
@@ -69,7 +60,7 @@ exports.config = {
 
         browser.addMockModule('disableNgAnimate', disableNgAnimate);
         browser.addMockModule('disableCssAnimate', disableCssAnimate);
-
+        
         browser.driver.manage().window().setSize(1280, 1024);
         jasmine.getEnv().addReporter(new JasmineReporters.JUnitXmlReporter({
             savePath: 'target/reports/e2e',

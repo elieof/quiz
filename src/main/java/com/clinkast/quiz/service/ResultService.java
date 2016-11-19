@@ -1,6 +1,7 @@
 package com.clinkast.quiz.service;
 
-import com.clinkast.quiz.service.dto.ResultDTO;
+import com.clinkast.quiz.domain.Result;
+import com.clinkast.quiz.web.rest.dto.ResultDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,7 +15,7 @@ public interface ResultService {
 
     /**
      * Save a result.
-     *
+     * 
      * @param resultDTO the entity to save
      * @return the persisted entity
      */
@@ -26,11 +27,11 @@ public interface ResultService {
      *  @param pageable the pagination information
      *  @return the list of entities
      */
-    Page<ResultDTO> findAll(Pageable pageable);
+    Page<Result> findAll(Pageable pageable);
 
     /**
      *  Get the "id" result.
-     *
+     *  
      *  @param id the id of the entity
      *  @return the entity
      */
@@ -38,18 +39,16 @@ public interface ResultService {
 
     /**
      *  Delete the "id" result.
-     *
+     *  
      *  @param id the id of the entity
      */
     void delete(Long id);
 
     /**
      * Search for the result corresponding to the query.
-     *
+     * 
      *  @param query the query of the search
-     *  
-     *  @param pageable the pagination information
      *  @return the list of entities
      */
-    Page<ResultDTO> search(String query, Pageable pageable);
+    Page<Result> search(String query, Pageable pageable);
 }

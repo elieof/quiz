@@ -4,8 +4,8 @@ import com.clinkast.quiz.service.QuizService;
 import com.clinkast.quiz.domain.Quiz;
 import com.clinkast.quiz.repository.QuizRepository;
 import com.clinkast.quiz.repository.search.QuizSearchRepository;
-import com.clinkast.quiz.service.dto.QuizDTO;
-import com.clinkast.quiz.service.mapper.QuizMapper;
+import com.clinkast.quiz.web.rest.dto.QuizDTO;
+import com.clinkast.quiz.web.rest.mapper.QuizMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -32,16 +32,16 @@ public class QuizServiceImpl implements QuizService{
     
     @Inject
     private QuizRepository quizRepository;
-
+    
     @Inject
     private QuizMapper quizMapper;
-
+    
     @Inject
     private QuizSearchRepository quizSearchRepository;
-
+    
     /**
      * Save a quiz.
-     *
+     * 
      * @param quizDTO the entity to save
      * @return the persisted entity
      */
@@ -61,10 +61,10 @@ public class QuizServiceImpl implements QuizService{
      *  @return the list of entities
      */
     @Transactional(readOnly = true) 
-    public Page<QuizDTO> findAll(Pageable pageable) {
+    public Page<Quiz> findAll(Pageable pageable) {
         log.debug("Request to get all Quizzes");
-        Page<Quiz> result = quizRepository.findAll(pageable);
-        return result.map(quiz -> quizMapper.quizToQuizDTO(quiz));
+        Page<Quiz> result = quizRepository.findAll(pageable); 
+        return result;
     }
 
     /**
@@ -83,7 +83,7 @@ public class QuizServiceImpl implements QuizService{
 
     /**
      *  Delete the  quiz by id.
-     *
+     *  
      *  @param id the id of the entity
      */
     public void delete(Long id) {
@@ -99,9 +99,8 @@ public class QuizServiceImpl implements QuizService{
      *  @return the list of entities
      */
     @Transactional(readOnly = true)
-    public Page<QuizDTO> search(String query, Pageable pageable) {
+    public Page<Quiz> search(String query, Pageable pageable) {
         log.debug("Request to search for a page of Quizzes for query {}", query);
-        Page<Quiz> result = quizSearchRepository.search(queryStringQuery(query), pageable);
-        return result.map(quiz -> quizMapper.quizToQuizDTO(quiz));
+        return quizSearchRepository.search(queryStringQuery(query), pageable);
     }
 }

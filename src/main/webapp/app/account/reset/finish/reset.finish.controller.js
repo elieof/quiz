@@ -19,11 +19,9 @@
         vm.resetAccount = {};
         vm.success = null;
 
-        $timeout(function (){angular.element('#password').focus();});
+        $timeout(function (){angular.element('[ng-model="vm.resetAccount.password"]').focus();});
 
         function finishReset() {
-            vm.doNotMatch = null;
-            vm.error = null;
             if (vm.resetAccount.password !== vm.confirmPassword) {
                 vm.doNotMatch = 'ERROR';
             } else {

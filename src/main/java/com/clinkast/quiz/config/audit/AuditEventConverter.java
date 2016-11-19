@@ -52,8 +52,8 @@ public class AuditEventConverter {
         Map<String, Object> results = new HashMap<>();
 
         if (data != null) {
-            for (Map.Entry<String, String> entry : data.entrySet()) {
-                results.put(entry.getKey(), entry.getValue());
+            for (String key : data.keySet()) {
+                results.put(key, data.get(key));
             }
         }
         return results;
@@ -70,8 +70,8 @@ public class AuditEventConverter {
         Map<String, String> results = new HashMap<>();
 
         if (data != null) {
-            for (Map.Entry<String, Object> entry : data.entrySet()) {
-                Object object = entry.getValue();
+            for (String key : data.keySet()) {
+                Object object = data.get(key);
 
                 // Extract the data that will be saved.
                 if (object instanceof WebAuthenticationDetails) {
@@ -79,9 +79,9 @@ public class AuditEventConverter {
                     results.put("remoteAddress", authenticationDetails.getRemoteAddress());
                     results.put("sessionId", authenticationDetails.getSessionId());
                 } else if (object != null) {
-                    results.put(entry.getKey(), object.toString());
+                    results.put(key, object.toString());
                 } else {
-                    results.put(entry.getKey(), "null");
+                    results.put(key, "null");
                 }
             }
         }

@@ -11,6 +11,7 @@ describe('Question e2e test', function () {
 
     beforeAll(function () {
         browser.get('/');
+        browser.driver.wait(protractor.until.elementIsVisible(element(by.css('h1'))));
 
         accountMenu.click();
         login.click();
@@ -22,18 +23,14 @@ describe('Question e2e test', function () {
 
     it('should load Questions', function () {
         entityMenu.click();
-        element.all(by.css('[ui-sref="question"]')).first().click().then(function() {
-            element.all(by.css('h2')).first().getAttribute('data-translate').then(function (value) {
-                expect(value).toMatch(/quizApp.question.home.title/);
-            });
+        element(by.css('[ui-sref="question"]')).click().then(function() {
+            expect(element.all(by.css('h2')).first().getText()).toMatch(/Questions/);
         });
     });
 
     it('should load create Question dialog', function () {
         element(by.css('[ui-sref="question.new"]')).click().then(function() {
-            element(by.css('h4.modal-title')).getAttribute('data-translate').then(function (value) {
-                expect(value).toMatch(/quizApp.question.home.createOrEditLabel/);
-            });
+            expect(element(by.css('h4.modal-title')).getText()).toMatch(/Create or edit a Question/);
             element(by.css('button.close')).click();
         });
     });

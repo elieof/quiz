@@ -3,8 +3,6 @@ package com.clinkast.quiz.repository;
 import com.clinkast.quiz.domain.User;
 
 import java.time.ZonedDateTime;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -26,9 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findOneByLogin(String login);
 
-    @Query(value = "select distinct user from User user left join fetch user.authorities",
-        countQuery = "select count(user) from User user")
-    Page<User> findAllWithAuthorities(Pageable pageable);
+    Optional<User> findOneById(Long userId);
 
     @Override
     void delete(User t);

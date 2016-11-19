@@ -5,42 +5,38 @@
         .module('quizApp')
         .controller('TopicDialogController', TopicDialogController);
 
-    TopicDialogController.$inject = ['$timeout', '$scope', '$stateParams', '$uibModalInstance', 'entity', 'Topic'];
+    TopicDialogController.$inject = ['$scope', '$stateParams', '$uibModalInstance', 'entity', 'Topic'];
 
-    function TopicDialogController ($timeout, $scope, $stateParams, $uibModalInstance, entity, Topic) {
+    function TopicDialogController ($scope, $stateParams, $uibModalInstance, entity, Topic) {
         var vm = this;
-
         vm.topic = entity;
-        vm.clear = clear;
-        vm.save = save;
+        vm.load = function(id) {
+            Topic.get({id : id}, function(result) {
+                vm.topic = result;
+            });
+        };
 
-        $timeout(function (){
-            angular.element('.form-group:eq(1)>input').focus();
-        });
+        var onSaveSuccess = function (result) {
+            $scope.$emit('quizApp:topicUpdate', result);
+            $uibModalInstance.close(result);
+            vm.isSaving = false;
+        };
 
-        function clear () {
-            $uibModalInstance.dismiss('cancel');
-        }
+        var onSaveError = function () {
+            vm.isSaving = false;
+        };
 
-        function save () {
+        vm.save = function () {
             vm.isSaving = true;
             if (vm.topic.id !== null) {
                 Topic.update(vm.topic, onSaveSuccess, onSaveError);
             } else {
                 Topic.save(vm.topic, onSaveSuccess, onSaveError);
             }
-        }
+        };
 
-        function onSaveSuccess (result) {
-            $scope.$emit('quizApp:topicUpdate', result);
-            $uibModalInstance.close(result);
-            vm.isSaving = false;
-        }
-
-        function onSaveError () {
-            vm.isSaving = false;
-        }
-
-
+        vm.clear = function() {
+            $uibModalInstance.dismiss('cancel');
+        };
     }
 })();

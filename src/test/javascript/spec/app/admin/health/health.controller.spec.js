@@ -3,12 +3,11 @@
 describe('Controller Tests', function () {
 
     describe('JhiHealthCheckController', function () {
-        var $scope, jhiHealthService; // actual implementations
+        var $scope; // actual implementations
         var createController; // local utility functions
 
-        beforeEach(inject(function ($injector, JhiHealthService) {
+        beforeEach(inject(function ($injector) {
             $scope = $injector.get('$rootScope').$new();
-            jhiHealthService = JhiHealthService;
             var locals = {
                 '$scope': $scope
             };
@@ -18,23 +17,41 @@ describe('Controller Tests', function () {
             createController();
         }));
 
-        describe('baseName and subSystemName', function () {
-            it('should return the basename when it has no sub system', function () {
-                expect($scope.vm.baseName('base')).toBe('base');
+        describe('isHealthObject and hasSubSystem', function () {
+            it('should verify empty object is not a health property leaf', function () {
+                expect($scope.vm.isHealthObject({})).toBe(false);
+                expect($scope.vm.hasSubSystem({})).toBe(false);
             });
 
-            it('should return the basename when it has sub systems', function () {
-                expect($scope.vm.baseName('base.subsystem.system')).toBe('base');
+            it('should verify object with property status and no subsystems is a health property leaf', function () {
+                var healthObject = {
+                    'status': 'UP'
+                };
+                expect($scope.vm.isHealthObject(healthObject)).toBe(true);
+                expect($scope.vm.hasSubSystem(healthObject)).toBe(false);
             });
 
-            it('should return the sub system name', function () {
-                expect($scope.vm.subSystemName('subsystem')).toBe('');
+            it('should verify that object property status and unrecognized objects is a health property leaf', function () {
+                var healthObject = {
+                    'status': 'UP',
+                    'subsystem': {
+                        'hello': 'UP'
+                    }
+                };
+                expect($scope.vm.isHealthObject(healthObject)).toBe(true);
+                expect($scope.vm.hasSubSystem(healthObject)).toBe(false);
             });
 
-            it('should return the subsystem when it has multiple keys', function () {
-                expect($scope.vm.subSystemName('subsystem.subsystem.system')).toBe(' - subsystem.system');
+            it('should verify object with property status but with subsystems is NOT a health property leaf', function () {
+                var healthObject = {
+                    'status': 'UP',
+                    'subsystem': {
+                        'status': 'UP'
+                    }
+                };
+                expect($scope.vm.isHealthObject(healthObject)).toBe(true);
+                expect($scope.vm.hasSubSystem(healthObject)).toBe(true);
             });
-
 
         });
 
@@ -42,7 +59,7 @@ describe('Controller Tests', function () {
             it('should flatten empty health data', function () {
                 var data = {};
                 var expected = [];
-                expect(jhiHealthService.transformHealthData(data)).toEqual(expected);
+                expect($scope.vm.transformHealthData(data)).toEqual(expected);
             });
 
             it('should flatten health data with no subsystems', function () {
@@ -73,7 +90,7 @@ describe('Controller Tests', function () {
                         'error': 'mail.a.b.c'
                     }
                 ];
-                expect(jhiHealthService.transformHealthData(data)).toEqual(expected);
+                expect($scope.vm.transformHealthData(data)).toEqual(expected);
             });
 
             it('should flatten health data with subsystems at level 1, main system has no additional information', function () {
@@ -131,7 +148,7 @@ describe('Controller Tests', function () {
                         }
                     }
                 ];
-                expect(jhiHealthService.transformHealthData(data)).toEqual(expected);
+                expect($scope.vm.transformHealthData(data)).toEqual(expected);
             });
 
             it('should flatten health data with subsystems at level 1, main system has additional information', function () {
@@ -197,7 +214,7 @@ describe('Controller Tests', function () {
                         }
                     }
                 ];
-                expect(jhiHealthService.transformHealthData(data)).toEqual(expected);
+                expect($scope.vm.transformHealthData(data)).toEqual(expected);
             });
 
             it('should flatten health data with subsystems at level 1, main system has additional error', function () {
@@ -261,9 +278,29 @@ describe('Controller Tests', function () {
                         }
                     }
                 ];
-                expect(jhiHealthService.transformHealthData(data)).toEqual(expected);
+                expect($scope.vm.transformHealthData(data)).toEqual(expected);
             });
         });
 
+        describe('getModuleName(path, name)', function () {
+            it('should show both path and name if defined', function () {
+                expect($scope.vm.getModuleName('path', 'name')).toEqual('path' + $scope.vm.separator + 'name');
+            });
+
+            it('should show only path if name is not defined', function () {
+                expect($scope.vm.getModuleName('path')).toEqual('path');
+                expect($scope.vm.getModuleName('path', '')).toEqual('path');
+                expect($scope.vm.getModuleName('path', null)).toEqual('path');
+            });
+
+            it('should show only name if path is not defined', function () {
+                expect($scope.vm.getModuleName(null, 'name')).toEqual('name');
+                expect($scope.vm.getModuleName('', 'name')).toEqual('name');
+            });
+
+            it('should show empty string if neither name nor path is defined', function () {
+                expect($scope.vm.getModuleName()).toEqual('');
+            });
+        });
     });
 });

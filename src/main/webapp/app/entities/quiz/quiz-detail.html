@@ -1,27 +1,23 @@
 
 <div>
-    <h2><span data-translate="quizApp.quiz.detail.title">Quiz</span> {{vm.quiz.id}}</h2>
+    <h2><span translate="quizApp.quiz.detail.title">Quiz</span> {{vm.quiz.id}}</h2>
     <hr>
-    <jhi-alert-error></jhi-alert-error>
-    <dl class="dl-horizontal jh-entity-details">
-        <dt><span data-translate="quizApp.quiz.name">Name</span></dt>
+    <dl class="dl-horizontal">
+        <dt><span translate="quizApp.quiz.name">Name</dt></dt>
         <dd>
-            <span>{{vm.quiz.name}}</span>
+            <span>{{vm.quiz.name}}<span>
         </dd>
-        <dt><span data-translate="quizApp.quiz.description">Description</span></dt>
+        <hr>
+        <dt><span translate="quizApp.quiz.description">Description</dt></dt>
         <dd>
-            <span>{{vm.quiz.description}}</span>
+            <span>{{vm.quiz.description}}<span>
         </dd>
+        <hr>
     </dl>
 
     <button type="submit"
-            ui-sref="{{ vm.previousState }}"
+            onclick="window.history.back()"
             class="btn btn-info">
-        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span data-translate="entity.action.back"> Back</span>
-    </button>
-
-    <button type="button" ui-sref="quiz-detail.edit({id:vm.quiz.id})" class="btn btn-primary">
-        <span class="glyphicon glyphicon-pencil"></span>
-        <span class="hidden-xs hidden-sm" data-translate="entity.action.edit"> Edit</span>
+        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span translate="entity.action.back"> Back</span>
     </button>
 </div>

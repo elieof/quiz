@@ -4,8 +4,8 @@ import com.clinkast.quiz.service.QuestionService;
 import com.clinkast.quiz.domain.Question;
 import com.clinkast.quiz.repository.QuestionRepository;
 import com.clinkast.quiz.repository.search.QuestionSearchRepository;
-import com.clinkast.quiz.service.dto.QuestionDTO;
-import com.clinkast.quiz.service.mapper.QuestionMapper;
+import com.clinkast.quiz.web.rest.dto.QuestionDTO;
+import com.clinkast.quiz.web.rest.mapper.QuestionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -32,16 +32,16 @@ public class QuestionServiceImpl implements QuestionService{
     
     @Inject
     private QuestionRepository questionRepository;
-
+    
     @Inject
     private QuestionMapper questionMapper;
-
+    
     @Inject
     private QuestionSearchRepository questionSearchRepository;
-
+    
     /**
      * Save a question.
-     *
+     * 
      * @param questionDTO the entity to save
      * @return the persisted entity
      */
@@ -61,10 +61,10 @@ public class QuestionServiceImpl implements QuestionService{
      *  @return the list of entities
      */
     @Transactional(readOnly = true) 
-    public Page<QuestionDTO> findAll(Pageable pageable) {
+    public Page<Question> findAll(Pageable pageable) {
         log.debug("Request to get all Questions");
-        Page<Question> result = questionRepository.findAll(pageable);
-        return result.map(question -> questionMapper.questionToQuestionDTO(question));
+        Page<Question> result = questionRepository.findAll(pageable); 
+        return result;
     }
 
     /**
@@ -83,7 +83,7 @@ public class QuestionServiceImpl implements QuestionService{
 
     /**
      *  Delete the  question by id.
-     *
+     *  
      *  @param id the id of the entity
      */
     public void delete(Long id) {
@@ -99,9 +99,8 @@ public class QuestionServiceImpl implements QuestionService{
      *  @return the list of entities
      */
     @Transactional(readOnly = true)
-    public Page<QuestionDTO> search(String query, Pageable pageable) {
+    public Page<Question> search(String query, Pageable pageable) {
         log.debug("Request to search for a page of Questions for query {}", query);
-        Page<Question> result = questionSearchRepository.search(queryStringQuery(query), pageable);
-        return result.map(question -> questionMapper.questionToQuestionDTO(question));
+        return questionSearchRepository.search(queryStringQuery(query), pageable);
     }
 }

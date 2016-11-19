@@ -19,6 +19,7 @@
         The initial schema has the '00000000000001' id, so that it is over-written if we re-generate it.
     -->
     <changeSet id="00000000000001" author="jhipster">
+        
         <createTable tableName="jhi_user">
             <column name="id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>
@@ -30,7 +31,7 @@
             <column name="first_name" type="varchar(50)"/>
             <column name="last_name" type="varchar(50)"/>
             <column name="email" type="varchar(100)">
-                <constraints unique="true" nullable="true"/>
+                <constraints unique="true" nullable="false"/>
             </column>
             <column name="activated" type="boolean" valueBoolean="false">
                 <constraints nullable="false" />
@@ -50,6 +51,7 @@
             <column name="last_modified_by" type="varchar(50)"/>
             <column name="last_modified_date" type="timestamp"/>
         </createTable>
+        
         <createIndex indexName="idx_user_login"
             tableName="jhi_user"
             unique="true">
@@ -61,6 +63,7 @@
             unique="true">
             <column name="email" type="varchar(100)"/>
         </createIndex>
+        
         <createTable tableName="jhi_authority">
             <column name="name" type="varchar(50)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -107,11 +110,12 @@
                   file="config/liquibase/users_authorities.csv"
                   separator=";"
                   tableName="jhi_user_authority"/>
+        
         <createTable tableName="jhi_persistent_audit_event">
             <column name="event_id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="principal" type="varchar(50)">
+            <column name="principal" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
             <column name="event_date" type="timestamp"/>
@@ -122,7 +126,7 @@
             <column name="event_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="name" type="varchar(150)">
+            <column name="name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="value" type="varchar(255)"/>
@@ -132,7 +136,7 @@
         <createIndex indexName="idx_persistent_audit_event"
                      tableName="jhi_persistent_audit_event"
                      unique="false">
-            <column name="principal" type="varchar(50)"/>
+            <column name="principal" type="varchar(255)"/>
             <column name="event_date" type="timestamp"/>
         </createIndex>
 
@@ -147,6 +151,7 @@
                                  constraintName="fk_evt_pers_audit_evt_data"
                                  referencedColumnNames="event_id"
                                  referencedTableName="jhi_persistent_audit_event"/>
+    
     </changeSet>
-
+    
 </databaseChangeLog>

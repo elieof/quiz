@@ -9,15 +9,16 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.*;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
+import org.springframework.util.Assert;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.metamodel.EntityType;
+import java.util.Set;
 import java.util.SortedSet;
-import java.util.stream.Stream;
 
-@SuppressWarnings("unused")
 @Configuration
 @EnableCaching
 @AutoConfigureAfter(value = { MetricsConfiguration.class, DatabaseConfiguration.class })
@@ -48,10 +49,22 @@ public class CacheConfiguration {
         cacheManager = net.sf.ehcache.CacheManager.create();
         cacheManager.getConfiguration().setMaxBytesLocalHeap(jHipsterProperties.getCache().getEhcache().getMaxBytesLocalHeap());
         log.debug("Registering Ehcache Metrics gauges");
-        Stream.of(cacheManager.getCacheNames()).forEach(name -> {
+        Set<EntityType<?>> entities = entityManager.getMetamodel().getEntities();
+        for (EntityType<?> entity : entities) {
+
+            String name = entity.getName();
+            if (name == null || entity.getJavaType() != null) {
+                name = entity.getJavaType().getName();
+            }
+            Assert.notNull(name, "entity cannot exist without a identifier");
+
             net.sf.ehcache.Cache cache = cacheManager.getCache(name);
-            cacheManager.replaceCacheWithDecoratedCache(cache, InstrumentedEhcache.instrument(metricRegistry, cache));
-        });
+            if (cache != null) {
+                cache.getCacheConfiguration().setTimeToLiveSeconds(jHipsterProperties.getCache().getTimeToLiveSeconds());
+                net.sf.ehcache.Ehcache decoratedCache = InstrumentedEhcache.instrument(metricRegistry, cache);
+                cacheManager.replaceCacheWithDecoratedCache(cache, decoratedCache);
+            }
+        }
         EhCacheCacheManager ehCacheManager = new EhCacheCacheManager();
         ehCacheManager.setCacheManager(cacheManager);
         return ehCacheManager;

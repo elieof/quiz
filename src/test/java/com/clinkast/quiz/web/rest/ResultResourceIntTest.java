@@ -1,45 +1,50 @@
 package com.clinkast.quiz.web.rest;
 
 import com.clinkast.quiz.QuizApp;
-
 import com.clinkast.quiz.domain.Result;
 import com.clinkast.quiz.repository.ResultRepository;
 import com.clinkast.quiz.service.ResultService;
 import com.clinkast.quiz.repository.search.ResultSearchRepository;
-import com.clinkast.quiz.service.dto.ResultDTO;
-import com.clinkast.quiz.service.mapper.ResultMapper;
+import com.clinkast.quiz.web.rest.dto.ResultDTO;
+import com.clinkast.quiz.web.rest.mapper.ResultMapper;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.hasItem;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.IntegrationTest;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
 /**
  * Test class for the ResultResource REST controller.
  *
  * @see ResultResource
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = QuizApp.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = QuizApp.class)
+@WebAppConfiguration
+@IntegrationTest
 public class ResultResourceIntTest {
+
 
     private static final Boolean DEFAULT_VALID = false;
     private static final Boolean UPDATED_VALID = true;
@@ -62,39 +67,26 @@ public class ResultResourceIntTest {
     @Inject
     private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
 
-    @Inject
-    private EntityManager em;
-
     private MockMvc restResultMockMvc;
 
     private Result result;
 
-    @Before
+    @PostConstruct
     public void setup() {
         MockitoAnnotations.initMocks(this);
         ResultResource resultResource = new ResultResource();
         ReflectionTestUtils.setField(resultResource, "resultService", resultService);
+        ReflectionTestUtils.setField(resultResource, "resultMapper", resultMapper);
         this.restResultMockMvc = MockMvcBuilders.standaloneSetup(resultResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setMessageConverters(jacksonMessageConverter).build();
     }
 
-    /**
-     * Create an entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
-     */
-    public static Result createEntity(EntityManager em) {
-        Result result = new Result();
-        result.setValid(DEFAULT_VALID);
-        return result;
-    }
-
     @Before
     public void initTest() {
         resultSearchRepository.deleteAll();
-        result = createEntity(em);
+        result = new Result();
+        result.setValid(DEFAULT_VALID);
     }
 
     @Test
@@ -149,7 +141,7 @@ public class ResultResourceIntTest {
         // Get all the results
         restResultMockMvc.perform(get("/api/results?sort=id,desc"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.[*].id").value(hasItem(result.getId().intValue())))
                 .andExpect(jsonPath("$.[*].valid").value(hasItem(DEFAULT_VALID.booleanValue())));
     }
@@ -163,7 +155,7 @@ public class ResultResourceIntTest {
         // Get the result
         restResultMockMvc.perform(get("/api/results/{id}", result.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").value(result.getId().intValue()))
             .andExpect(jsonPath("$.valid").value(DEFAULT_VALID.booleanValue()));
     }
@@ -185,7 +177,8 @@ public class ResultResourceIntTest {
         int databaseSizeBeforeUpdate = resultRepository.findAll().size();
 
         // Update the result
-        Result updatedResult = resultRepository.findOne(result.getId());
+        Result updatedResult = new Result();
+        updatedResult.setId(result.getId());
         updatedResult.setValid(UPDATED_VALID);
         ResultDTO resultDTO = resultMapper.resultToResultDTO(updatedResult);
 
@@ -237,7 +230,7 @@ public class ResultResourceIntTest {
         // Search the result
         restResultMockMvc.perform(get("/api/_search/results?query=id:" + result.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.[*].id").value(hasItem(result.getId().intValue())))
             .andExpect(jsonPath("$.[*].valid").value(hasItem(DEFAULT_VALID.booleanValue())));
     }

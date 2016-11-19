@@ -11,6 +11,7 @@ describe('Topic e2e test', function () {
 
     beforeAll(function () {
         browser.get('/');
+        browser.driver.wait(protractor.until.elementIsVisible(element(by.css('h1'))));
 
         accountMenu.click();
         login.click();
@@ -22,18 +23,14 @@ describe('Topic e2e test', function () {
 
     it('should load Topics', function () {
         entityMenu.click();
-        element.all(by.css('[ui-sref="topic"]')).first().click().then(function() {
-            element.all(by.css('h2')).first().getAttribute('data-translate').then(function (value) {
-                expect(value).toMatch(/quizApp.topic.home.title/);
-            });
+        element(by.css('[ui-sref="topic"]')).click().then(function() {
+            expect(element.all(by.css('h2')).first().getText()).toMatch(/Topics/);
         });
     });
 
     it('should load create Topic dialog', function () {
         element(by.css('[ui-sref="topic.new"]')).click().then(function() {
-            element(by.css('h4.modal-title')).getAttribute('data-translate').then(function (value) {
-                expect(value).toMatch(/quizApp.topic.home.createOrEditLabel/);
-            });
+            expect(element(by.css('h4.modal-title')).getText()).toMatch(/Create or edit a Topic/);
             element(by.css('button.close')).click();
         });
     });

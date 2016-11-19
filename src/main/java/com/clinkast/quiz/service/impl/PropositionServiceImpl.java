@@ -4,8 +4,8 @@ import com.clinkast.quiz.service.PropositionService;
 import com.clinkast.quiz.domain.Proposition;
 import com.clinkast.quiz.repository.PropositionRepository;
 import com.clinkast.quiz.repository.search.PropositionSearchRepository;
-import com.clinkast.quiz.service.dto.PropositionDTO;
-import com.clinkast.quiz.service.mapper.PropositionMapper;
+import com.clinkast.quiz.web.rest.dto.PropositionDTO;
+import com.clinkast.quiz.web.rest.mapper.PropositionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -32,16 +32,16 @@ public class PropositionServiceImpl implements PropositionService{
     
     @Inject
     private PropositionRepository propositionRepository;
-
+    
     @Inject
     private PropositionMapper propositionMapper;
-
+    
     @Inject
     private PropositionSearchRepository propositionSearchRepository;
-
+    
     /**
      * Save a proposition.
-     *
+     * 
      * @param propositionDTO the entity to save
      * @return the persisted entity
      */
@@ -61,10 +61,10 @@ public class PropositionServiceImpl implements PropositionService{
      *  @return the list of entities
      */
     @Transactional(readOnly = true) 
-    public Page<PropositionDTO> findAll(Pageable pageable) {
+    public Page<Proposition> findAll(Pageable pageable) {
         log.debug("Request to get all Propositions");
-        Page<Proposition> result = propositionRepository.findAll(pageable);
-        return result.map(proposition -> propositionMapper.propositionToPropositionDTO(proposition));
+        Page<Proposition> result = propositionRepository.findAll(pageable); 
+        return result;
     }
 
     /**
@@ -83,7 +83,7 @@ public class PropositionServiceImpl implements PropositionService{
 
     /**
      *  Delete the  proposition by id.
-     *
+     *  
      *  @param id the id of the entity
      */
     public void delete(Long id) {
@@ -99,9 +99,8 @@ public class PropositionServiceImpl implements PropositionService{
      *  @return the list of entities
      */
     @Transactional(readOnly = true)
-    public Page<PropositionDTO> search(String query, Pageable pageable) {
+    public Page<Proposition> search(String query, Pageable pageable) {
         log.debug("Request to search for a page of Propositions for query {}", query);
-        Page<Proposition> result = propositionSearchRepository.search(queryStringQuery(query), pageable);
-        return result.map(proposition -> propositionMapper.propositionToPropositionDTO(proposition));
+        return propositionSearchRepository.search(queryStringQuery(query), pageable);
     }
 }

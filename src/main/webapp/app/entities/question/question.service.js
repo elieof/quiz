@@ -14,9 +14,7 @@
             'get': {
                 method: 'GET',
                 transformResponse: function (data) {
-                    if (data) {
-                        data = angular.fromJson(data);
-                    }
+                    data = angular.fromJson(data);
                     return data;
                 }
             },

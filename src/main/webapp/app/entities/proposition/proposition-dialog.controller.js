@@ -5,43 +5,39 @@
         .module('quizApp')
         .controller('PropositionDialogController', PropositionDialogController);
 
-    PropositionDialogController.$inject = ['$timeout', '$scope', '$stateParams', '$uibModalInstance', 'entity', 'Proposition', 'Question'];
+    PropositionDialogController.$inject = ['$scope', '$stateParams', '$uibModalInstance', 'entity', 'Proposition', 'Question'];
 
-    function PropositionDialogController ($timeout, $scope, $stateParams, $uibModalInstance, entity, Proposition, Question) {
+    function PropositionDialogController ($scope, $stateParams, $uibModalInstance, entity, Proposition, Question) {
         var vm = this;
-
         vm.proposition = entity;
-        vm.clear = clear;
-        vm.save = save;
         vm.questions = Question.query();
+        vm.load = function(id) {
+            Proposition.get({id : id}, function(result) {
+                vm.proposition = result;
+            });
+        };
 
-        $timeout(function (){
-            angular.element('.form-group:eq(1)>input').focus();
-        });
+        var onSaveSuccess = function (result) {
+            $scope.$emit('quizApp:propositionUpdate', result);
+            $uibModalInstance.close(result);
+            vm.isSaving = false;
+        };
 
-        function clear () {
-            $uibModalInstance.dismiss('cancel');
-        }
+        var onSaveError = function () {
+            vm.isSaving = false;
+        };
 
-        function save () {
+        vm.save = function () {
             vm.isSaving = true;
             if (vm.proposition.id !== null) {
                 Proposition.update(vm.proposition, onSaveSuccess, onSaveError);
             } else {
                 Proposition.save(vm.proposition, onSaveSuccess, onSaveError);
             }
-        }
+        };
 
-        function onSaveSuccess (result) {
-            $scope.$emit('quizApp:propositionUpdate', result);
-            $uibModalInstance.close(result);
-            vm.isSaving = false;
-        }
-
-        function onSaveError () {
-            vm.isSaving = false;
-        }
-
-
+        vm.clear = function() {
+            $uibModalInstance.dismiss('cancel');
+        };
     }
 })();

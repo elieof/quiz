@@ -32,8 +32,9 @@
                     var newKey = key.substr(0, index);
 
                     // Keep the name of the domain
+                    index = newKey.lastIndexOf('.');
                     vm.cachesStats[newKey] = {
-                        'name': newKey,
+                        'name': newKey.substr(index + 1),
                         'value': value
                     };
                 }

@@ -1,48 +1,52 @@
 package com.clinkast.quiz.web.rest;
 
 import com.clinkast.quiz.QuizApp;
-
 import com.clinkast.quiz.domain.Topic;
 import com.clinkast.quiz.repository.TopicRepository;
 import com.clinkast.quiz.service.TopicService;
 import com.clinkast.quiz.repository.search.TopicSearchRepository;
-import com.clinkast.quiz.service.dto.TopicDTO;
-import com.clinkast.quiz.service.mapper.TopicMapper;
+import com.clinkast.quiz.web.rest.dto.TopicDTO;
+import com.clinkast.quiz.web.rest.mapper.TopicMapper;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.hasItem;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.IntegrationTest;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
 /**
  * Test class for the TopicResource REST controller.
  *
  * @see TopicResource
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = QuizApp.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = QuizApp.class)
+@WebAppConfiguration
+@IntegrationTest
 public class TopicResourceIntTest {
 
-    private static final String DEFAULT_NAME = "AAAAAAAAAA";
-    private static final String UPDATED_NAME = "BBBBBBBBBB";
+    private static final String DEFAULT_NAME = "AAAAA";
+    private static final String UPDATED_NAME = "BBBBB";
 
     @Inject
     private TopicRepository topicRepository;
@@ -62,39 +66,26 @@ public class TopicResourceIntTest {
     @Inject
     private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
 
-    @Inject
-    private EntityManager em;
-
     private MockMvc restTopicMockMvc;
 
     private Topic topic;
 
-    @Before
+    @PostConstruct
     public void setup() {
         MockitoAnnotations.initMocks(this);
         TopicResource topicResource = new TopicResource();
         ReflectionTestUtils.setField(topicResource, "topicService", topicService);
+        ReflectionTestUtils.setField(topicResource, "topicMapper", topicMapper);
         this.restTopicMockMvc = MockMvcBuilders.standaloneSetup(topicResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setMessageConverters(jacksonMessageConverter).build();
     }
 
-    /**
-     * Create an entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
-     */
-    public static Topic createEntity(EntityManager em) {
-        Topic topic = new Topic();
-        topic.setName(DEFAULT_NAME);
-        return topic;
-    }
-
     @Before
     public void initTest() {
         topicSearchRepository.deleteAll();
-        topic = createEntity(em);
+        topic = new Topic();
+        topic.setName(DEFAULT_NAME);
     }
 
     @Test
@@ -149,7 +140,7 @@ public class TopicResourceIntTest {
         // Get all the topics
         restTopicMockMvc.perform(get("/api/topics?sort=id,desc"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.[*].id").value(hasItem(topic.getId().intValue())))
                 .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
     }
@@ -163,7 +154,7 @@ public class TopicResourceIntTest {
         // Get the topic
         restTopicMockMvc.perform(get("/api/topics/{id}", topic.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").value(topic.getId().intValue()))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()));
     }
@@ -185,7 +176,8 @@ public class TopicResourceIntTest {
         int databaseSizeBeforeUpdate = topicRepository.findAll().size();
 
         // Update the topic
-        Topic updatedTopic = topicRepository.findOne(topic.getId());
+        Topic updatedTopic = new Topic();
+        updatedTopic.setId(topic.getId());
         updatedTopic.setName(UPDATED_NAME);
         TopicDTO topicDTO = topicMapper.topicToTopicDTO(updatedTopic);
 
@@ -237,7 +229,7 @@ public class TopicResourceIntTest {
         // Search the topic
         restTopicMockMvc.perform(get("/api/_search/topics?query=id:" + topic.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.[*].id").value(hasItem(topic.getId().intValue())))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
     }

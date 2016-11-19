@@ -1,17 +1,21 @@
 package com.clinkast.quiz.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.clinkast.quiz.domain.Question;
 import com.clinkast.quiz.service.QuestionService;
 import com.clinkast.quiz.web.rest.util.HeaderUtil;
 import com.clinkast.quiz.web.rest.util.PaginationUtil;
-import com.clinkast.quiz.service.dto.QuestionDTO;
+import com.clinkast.quiz.web.rest.dto.QuestionDTO;
+import com.clinkast.quiz.web.rest.mapper.QuestionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
@@ -37,7 +41,10 @@ public class QuestionResource {
         
     @Inject
     private QuestionService questionService;
-
+    
+    @Inject
+    private QuestionMapper questionMapper;
+    
     /**
      * POST  /questions : Create a new question.
      *
@@ -45,7 +52,9 @@ public class QuestionResource {
      * @return the ResponseEntity with status 201 (Created) and with body the new questionDTO, or with status 400 (Bad Request) if the question has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PostMapping("/questions")
+    @RequestMapping(value = "/questions",
+        method = RequestMethod.POST,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<QuestionDTO> createQuestion(@Valid @RequestBody QuestionDTO questionDTO) throws URISyntaxException {
         log.debug("REST request to save Question : {}", questionDTO);
@@ -67,7 +76,9 @@ public class QuestionResource {
      * or with status 500 (Internal Server Error) if the questionDTO couldnt be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PutMapping("/questions")
+    @RequestMapping(value = "/questions",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<QuestionDTO> updateQuestion(@Valid @RequestBody QuestionDTO questionDTO) throws URISyntaxException {
         log.debug("REST request to update Question : {}", questionDTO);
@@ -87,14 +98,17 @@ public class QuestionResource {
      * @return the ResponseEntity with status 200 (OK) and the list of questions in body
      * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
      */
-    @GetMapping("/questions")
+    @RequestMapping(value = "/questions",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Transactional(readOnly = true)
     public ResponseEntity<List<QuestionDTO>> getAllQuestions(Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to get a page of Questions");
-        Page<QuestionDTO> page = questionService.findAll(pageable);
+        Page<Question> page = questionService.findAll(pageable); 
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/questions");
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(questionMapper.questionsToQuestionDTOs(page.getContent()), headers, HttpStatus.OK);
     }
 
     /**
@@ -103,7 +117,9 @@ public class QuestionResource {
      * @param id the id of the questionDTO to retrieve
      * @return the ResponseEntity with status 200 (OK) and with body the questionDTO, or with status 404 (Not Found)
      */
-    @GetMapping("/questions/{id}")
+    @RequestMapping(value = "/questions/{id}",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<QuestionDTO> getQuestion(@PathVariable Long id) {
         log.debug("REST request to get Question : {}", id);
@@ -121,7 +137,9 @@ public class QuestionResource {
      * @param id the id of the questionDTO to delete
      * @return the ResponseEntity with status 200 (OK)
      */
-    @DeleteMapping("/questions/{id}")
+    @RequestMapping(value = "/questions/{id}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
         log.debug("REST request to delete Question : {}", id);
@@ -133,20 +151,20 @@ public class QuestionResource {
      * SEARCH  /_search/questions?query=:query : search for the question corresponding
      * to the query.
      *
-     * @param query the query of the question search 
-     * @param pageable the pagination information
+     * @param query the query of the question search
      * @return the result of the search
-     * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
      */
-    @GetMapping("/_search/questions")
+    @RequestMapping(value = "/_search/questions",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Transactional(readOnly = true)
     public ResponseEntity<List<QuestionDTO>> searchQuestions(@RequestParam String query, Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to search for a page of Questions for query {}", query);
-        Page<QuestionDTO> page = questionService.search(query, pageable);
+        Page<Question> page = questionService.search(query, pageable);
         HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/questions");
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(questionMapper.questionsToQuestionDTOs(page.getContent()), headers, HttpStatus.OK);
     }
-
 
 }

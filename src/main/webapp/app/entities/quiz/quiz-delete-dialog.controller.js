@@ -9,20 +9,15 @@
 
     function QuizDeleteController($uibModalInstance, entity, Quiz) {
         var vm = this;
-
         vm.quiz = entity;
-        vm.clear = clear;
-        vm.confirmDelete = confirmDelete;
-
-        function clear () {
+        vm.clear = function() {
             $uibModalInstance.dismiss('cancel');
-        }
-
-        function confirmDelete (id) {
+        };
+        vm.confirmDelete = function (id) {
             Quiz.delete({id: id},
                 function () {
                     $uibModalInstance.close(true);
                 });
-        }
+        };
     }
 })();

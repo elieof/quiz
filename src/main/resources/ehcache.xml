@@ -36,34 +36,4 @@
     <cache name="com.clinkast.quiz.domain.User.persistentTokens"
            timeToLiveSeconds="3600">
     </cache>
-
-    <cache name="com.clinkast.quiz.domain.Topic"
-        timeToLiveSeconds="3600">
-    </cache>
-
-    <cache name="com.clinkast.quiz.domain.Proposition"
-        timeToLiveSeconds="3600">
-    </cache>
-
-    <cache name="com.clinkast.quiz.domain.Question"
-        timeToLiveSeconds="3600">
-    </cache>
-
-    <cache name="com.clinkast.quiz.domain.Question.propositions"
-        timeToLiveSeconds="3600">
-    </cache>
-
-    <cache name="com.clinkast.quiz.domain.Quiz"
-        timeToLiveSeconds="3600">
-    </cache>
-
-    <cache name="com.clinkast.quiz.domain.Quiz.questions"
-        timeToLiveSeconds="3600">
-    </cache>
-
-    <cache name="com.clinkast.quiz.domain.Result"
-        timeToLiveSeconds="3600">
-    </cache>
-
-    <!-- jhipster-needle-ehcache-add-entry -->
-</ehcache>
+    </ehcache>

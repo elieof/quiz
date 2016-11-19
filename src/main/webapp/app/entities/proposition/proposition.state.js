@@ -71,42 +71,9 @@
                     return $translate.refresh();
                 }],
                 entity: ['$stateParams', 'Proposition', function($stateParams, Proposition) {
-                    return Proposition.get({id : $stateParams.id}).$promise;
-                }],
-                previousState: ["$state", function ($state) {
-                    var currentStateData = {
-                        name: $state.current.name || 'proposition',
-                        params: $state.params,
-                        url: $state.href($state.current.name, $state.params)
-                    };
-                    return currentStateData;
+                    return Proposition.get({id : $stateParams.id});
                 }]
             }
-        })
-        .state('proposition-detail.edit', {
-            parent: 'proposition-detail',
-            url: '/detail/edit',
-            data: {
-                authorities: ['ROLE_USER']
-            },
-            onEnter: ['$stateParams', '$state', '$uibModal', function($stateParams, $state, $uibModal) {
-                $uibModal.open({
-                    templateUrl: 'app/entities/proposition/proposition-dialog.html',
-                    controller: 'PropositionDialogController',
-                    controllerAs: 'vm',
-                    backdrop: 'static',
-                    size: 'lg',
-                    resolve: {
-                        entity: ['Proposition', function(Proposition) {
-                            return Proposition.get({id : $stateParams.id}).$promise;
-                        }]
-                    }
-                }).result.then(function() {
-                    $state.go('^', {}, { reload: false });
-                }, function() {
-                    $state.go('^');
-                });
-            }]
         })
         .state('proposition.new', {
             parent: 'proposition',
@@ -132,7 +99,7 @@
                         }
                     }
                 }).result.then(function() {
-                    $state.go('proposition', null, { reload: 'proposition' });
+                    $state.go('proposition', null, { reload: true });
                 }, function() {
                     $state.go('proposition');
                 });
@@ -153,11 +120,11 @@
                     size: 'lg',
                     resolve: {
                         entity: ['Proposition', function(Proposition) {
-                            return Proposition.get({id : $stateParams.id}).$promise;
+                            return Proposition.get({id : $stateParams.id});
                         }]
                     }
                 }).result.then(function() {
-                    $state.go('proposition', null, { reload: 'proposition' });
+                    $state.go('proposition', null, { reload: true });
                 }, function() {
                     $state.go('^');
                 });
@@ -177,11 +144,11 @@
                     size: 'md',
                     resolve: {
                         entity: ['Proposition', function(Proposition) {
-                            return Proposition.get({id : $stateParams.id}).$promise;
+                            return Proposition.get({id : $stateParams.id});
                         }]
                     }
                 }).result.then(function() {
-                    $state.go('proposition', null, { reload: 'proposition' });
+                    $state.go('proposition', null, { reload: true });
                 }, function() {
                     $state.go('^');
                 });

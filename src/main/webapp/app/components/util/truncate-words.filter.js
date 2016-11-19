@@ -21,6 +21,7 @@
                     input = inputWords.slice(0, words).join(' ') + '...';
                 }
             }
+            
             return input;
         }
     }

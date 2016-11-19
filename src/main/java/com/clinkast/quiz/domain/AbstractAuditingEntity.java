@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
 
 /**
  * Base abstract class for entities which will hold definitions for created, last modified by and created,

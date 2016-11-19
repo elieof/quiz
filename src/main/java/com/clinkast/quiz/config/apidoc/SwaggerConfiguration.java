@@ -3,9 +3,12 @@ package com.clinkast.quiz.config.apidoc;
 import com.clinkast.quiz.config.Constants;
 import com.clinkast.quiz.config.JHipsterProperties;
 
+import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.*;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StopWatch;
 import springfox.documentation.service.ApiInfo;
@@ -25,8 +28,7 @@ import static springfox.documentation.builders.PathSelectors.regex;
  */
 @Configuration
 @EnableSwagger2
-@Import(springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration.class)
-@Profile(Constants.SPRING_PROFILE_SWAGGER)
+@ConditionalOnExpression("#{!environment.acceptsProfiles('" + Constants.SPRING_PROFILE_NO_SWAGGER + "') && !environment.acceptsProfiles('" + Constants.SPRING_PROFILE_PRODUCTION + "')}")
 public class SwaggerConfiguration {
 
     private final Logger log = LoggerFactory.getLogger(SwaggerConfiguration.class);
@@ -62,6 +64,11 @@ public class SwaggerConfiguration {
             .apiInfo(apiInfo)
             .forCodeGeneration(true)
             .genericModelSubstitutes(ResponseEntity.class)
+            .ignoredParameterTypes(Pageable.class)
+            .ignoredParameterTypes(java.sql.Date.class)
+            .directModelSubstitute(java.time.LocalDate.class, java.sql.Date.class)
+            .directModelSubstitute(java.time.ZonedDateTime.class, Date.class)
+            .directModelSubstitute(java.time.LocalDateTime.class, Date.class)
             .select()
             .paths(regex(DEFAULT_INCLUDE_PATTERN))
             .build();

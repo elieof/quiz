@@ -10,6 +10,7 @@
     function AuthServerProvider ($http, $localStorage, $sessionStorage, $q) {
         var service = {
             getToken: getToken,
+            hasValidToken: hasValidToken,
             login: login,
             loginWithToken: loginWithToken,
             storeAuthenticationToken: storeAuthenticationToken,
@@ -22,8 +23,12 @@
             return $localStorage.authenticationToken || $sessionStorage.authenticationToken;
         }
 
-        function login (credentials) {
+        function hasValidToken () {
+            var token = this.getToken();
+            return token && token.expires && token.expires > new Date().getTime();
+        }
 
+        function login (credentials) {
             var data = {
                 username: credentials.username,
                 password: credentials.password,
@@ -44,10 +49,11 @@
         function loginWithToken(jwt, rememberMe) {
             var deferred = $q.defer();
 
-            if (angular.isDefined(jwt)) {
+            if (jwt !== undefined) {
                 this.storeAuthenticationToken(jwt, rememberMe);
                 deferred.resolve(jwt);
-            } else {
+            }
+            else {
                 deferred.reject();
             }
 

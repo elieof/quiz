@@ -4,13 +4,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.servlet.InstrumentedFilter;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.clinkast.quiz.web.filter.CachingHttpHeadersFilter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.embedded.*;
-import org.springframework.boot.web.servlet.ServletContextInitializer;
+import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
+import org.springframework.boot.context.embedded.MimeMappings;
+import org.springframework.boot.context.embedded.ServletContextInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -19,7 +19,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.*;
 import javax.inject.Inject;
 import javax.servlet.*;
@@ -43,9 +42,7 @@ public class WebConfigurer implements ServletContextInitializer, EmbeddedServlet
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
-        if (env.getActiveProfiles().length != 0) {
-            log.info("Web application configuration, using profiles: {}", Arrays.toString(env.getActiveProfiles()));
-        }
+        log.info("Web application configuration, using profiles: {}", Arrays.toString(env.getActiveProfiles()));
         EnumSet<DispatcherType> disps = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.ASYNC);
         initMetrics(servletContext, disps);
         if (env.acceptsProfiles(Constants.SPRING_PROFILE_PRODUCTION)) {
@@ -55,7 +52,7 @@ public class WebConfigurer implements ServletContextInitializer, EmbeddedServlet
     }
 
     /**
-     * Customize the Servlet engine: Mime types, the document root, the cache.
+     * Set up Mime types and, if needed, set the document root.
      */
     @Override
     public void customize(ConfigurableEmbeddedServletContainer container) {
@@ -65,35 +62,17 @@ public class WebConfigurer implements ServletContextInitializer, EmbeddedServlet
         // CloudFoundry issue, see https://github.com/cloudfoundry/gorouter/issues/64
         mappings.add("json", "text/html;charset=utf-8");
         container.setMimeMappings(mappings);
-        // When running in an IDE or with ./mvnw spring-boot:run, set location of the static web assets.
-        setLocationForStaticAssets(container);
-    }
 
-    private void setLocationForStaticAssets(ConfigurableEmbeddedServletContainer container) {
+        // When running in an IDE or with ./mvnw spring-boot:run, set location of the static web assets.
         File root;
-        String prefixPath = resolvePathPrefix();
         if (env.acceptsProfiles(Constants.SPRING_PROFILE_PRODUCTION)) {
-            root = new File(prefixPath + "target/www/");
+            root = new File("target/www/");
         } else {
-            root = new File(prefixPath + "src/main/webapp/");
+            root = new File("src/main/webapp/");
         }
         if (root.exists() && root.isDirectory()) {
             container.setDocumentRoot(root);
         }
-    }
-
-    /**
-     *  Resolve path prefix to static resources.
-     */
-    private String resolvePathPrefix() {
-        String fullExecutablePath = this.getClass().getResource("").getPath();
-        String rootPath = Paths.get(".").toUri().normalize().getPath();
-        String extractedPath = fullExecutablePath.replace(rootPath, "");
-        int extractionEndIndex = extractedPath.indexOf("target/");
-        if(extractionEndIndex <= 0) {
-            return "";
-        }
-        return extractedPath.substring(0, extractionEndIndex);
     }
 
     /**
@@ -132,20 +111,20 @@ public class WebConfigurer implements ServletContextInitializer, EmbeddedServlet
         ServletRegistration.Dynamic metricsAdminServlet =
             servletContext.addServlet("metricsServlet", new MetricsServlet());
 
-        metricsAdminServlet.addMapping("/management/jhipster/metrics/*");
+        metricsAdminServlet.addMapping("/metrics/metrics/*");
         metricsAdminServlet.setAsyncSupported(true);
         metricsAdminServlet.setLoadOnStartup(2);
     }
 
     @Bean
-    @ConditionalOnProperty(name = "jhipster.cors.allowed-origins")
     public CorsFilter corsFilter() {
-        log.debug("Registering CORS filter");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = jHipsterProperties.getCors();
-        source.registerCorsConfiguration("/api/**", config);
-        source.registerCorsConfiguration("/v2/api-docs", config);
-        source.registerCorsConfiguration("/oauth/**", config);
+        if (config.getAllowedOrigins() != null && !config.getAllowedOrigins().isEmpty()) {
+            source.registerCorsConfiguration("/api/**", config);
+            source.registerCorsConfiguration("/v2/api-docs", config);
+            source.registerCorsConfiguration("/oauth/**", config);
+        }
         return new CorsFilter(source);
     }
 }

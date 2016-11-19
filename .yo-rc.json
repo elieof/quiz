@@ -1,6 +1,6 @@
 {
   "generator-jhipster": {
-    "jhipsterVersion": "3.11.0",
+    "jhipsterVersion": "3.0.0",
     "baseName": "quiz",
     "packageName": "com.clinkast.quiz",
     "packageFolder": "com/clinkast/quiz",

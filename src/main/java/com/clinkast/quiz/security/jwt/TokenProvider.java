@@ -13,7 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.*;
@@ -51,7 +50,7 @@ public class TokenProvider {
             .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
-        Date validity;
+        Date validity = new Date(now);
         if (rememberMe) {
             validity = new Date(now + this.tokenValidityInSecondsForRememberMe);
         } else {
@@ -72,13 +71,12 @@ public class TokenProvider {
             .parseClaimsJws(token)
             .getBody();
 
+        String principal = claims.getSubject();
+
         Collection<? extends GrantedAuthority> authorities =
             Arrays.asList(claims.get(AUTHORITIES_KEY).toString().split(",")).stream()
                 .map(authority -> new SimpleGrantedAuthority(authority))
                 .collect(Collectors.toList());
-
-        User principal = new User(claims.getSubject(), "",
-            authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }

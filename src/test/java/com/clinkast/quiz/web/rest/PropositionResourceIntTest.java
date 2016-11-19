@@ -1,54 +1,57 @@
 package com.clinkast.quiz.web.rest;
 
 import com.clinkast.quiz.QuizApp;
-
 import com.clinkast.quiz.domain.Proposition;
 import com.clinkast.quiz.repository.PropositionRepository;
 import com.clinkast.quiz.service.PropositionService;
 import com.clinkast.quiz.repository.search.PropositionSearchRepository;
-import com.clinkast.quiz.service.dto.PropositionDTO;
-import com.clinkast.quiz.service.mapper.PropositionMapper;
+import com.clinkast.quiz.web.rest.dto.PropositionDTO;
+import com.clinkast.quiz.web.rest.mapper.PropositionMapper;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.hasItem;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.IntegrationTest;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
 /**
  * Test class for the PropositionResource REST controller.
  *
  * @see PropositionResource
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = QuizApp.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = QuizApp.class)
+@WebAppConfiguration
+@IntegrationTest
 public class PropositionResourceIntTest {
 
-    private static final String DEFAULT_STATEMENT = "AAAAAAAAAA";
-    private static final String UPDATED_STATEMENT = "BBBBBBBBBB";
+    private static final String DEFAULT_STATEMENT = "AAAAA";
+    private static final String UPDATED_STATEMENT = "BBBBB";
 
     private static final Boolean DEFAULT_VALID = false;
     private static final Boolean UPDATED_VALID = true;
-
-    private static final String DEFAULT_EXPLANATION = "AAAAAAAAAA";
-    private static final String UPDATED_EXPLANATION = "BBBBBBBBBB";
+    private static final String DEFAULT_EXPLANATION = "AAAAA";
+    private static final String UPDATED_EXPLANATION = "BBBBB";
 
     @Inject
     private PropositionRepository propositionRepository;
@@ -68,41 +71,28 @@ public class PropositionResourceIntTest {
     @Inject
     private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
 
-    @Inject
-    private EntityManager em;
-
     private MockMvc restPropositionMockMvc;
 
     private Proposition proposition;
 
-    @Before
+    @PostConstruct
     public void setup() {
         MockitoAnnotations.initMocks(this);
         PropositionResource propositionResource = new PropositionResource();
         ReflectionTestUtils.setField(propositionResource, "propositionService", propositionService);
+        ReflectionTestUtils.setField(propositionResource, "propositionMapper", propositionMapper);
         this.restPropositionMockMvc = MockMvcBuilders.standaloneSetup(propositionResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setMessageConverters(jacksonMessageConverter).build();
     }
 
-    /**
-     * Create an entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
-     */
-    public static Proposition createEntity(EntityManager em) {
-        Proposition proposition = new Proposition();
-        proposition.setStatement(DEFAULT_STATEMENT);
-        proposition.setValid(DEFAULT_VALID);
-        proposition.setExplanation(DEFAULT_EXPLANATION);
-        return proposition;
-    }
-
     @Before
     public void initTest() {
         propositionSearchRepository.deleteAll();
-        proposition = createEntity(em);
+        proposition = new Proposition();
+        proposition.setStatement(DEFAULT_STATEMENT);
+        proposition.setValid(DEFAULT_VALID);
+        proposition.setExplanation(DEFAULT_EXPLANATION);
     }
 
     @Test
@@ -178,7 +168,7 @@ public class PropositionResourceIntTest {
         // Get all the propositions
         restPropositionMockMvc.perform(get("/api/propositions?sort=id,desc"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.[*].id").value(hasItem(proposition.getId().intValue())))
                 .andExpect(jsonPath("$.[*].statement").value(hasItem(DEFAULT_STATEMENT.toString())))
                 .andExpect(jsonPath("$.[*].valid").value(hasItem(DEFAULT_VALID.booleanValue())))
@@ -194,7 +184,7 @@ public class PropositionResourceIntTest {
         // Get the proposition
         restPropositionMockMvc.perform(get("/api/propositions/{id}", proposition.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").value(proposition.getId().intValue()))
             .andExpect(jsonPath("$.statement").value(DEFAULT_STATEMENT.toString()))
             .andExpect(jsonPath("$.valid").value(DEFAULT_VALID.booleanValue()))
@@ -218,7 +208,8 @@ public class PropositionResourceIntTest {
         int databaseSizeBeforeUpdate = propositionRepository.findAll().size();
 
         // Update the proposition
-        Proposition updatedProposition = propositionRepository.findOne(proposition.getId());
+        Proposition updatedProposition = new Proposition();
+        updatedProposition.setId(proposition.getId());
         updatedProposition.setStatement(UPDATED_STATEMENT);
         updatedProposition.setValid(UPDATED_VALID);
         updatedProposition.setExplanation(UPDATED_EXPLANATION);
@@ -274,7 +265,7 @@ public class PropositionResourceIntTest {
         // Search the proposition
         restPropositionMockMvc.perform(get("/api/_search/propositions?query=id:" + proposition.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.[*].id").value(hasItem(proposition.getId().intValue())))
             .andExpect(jsonPath("$.[*].statement").value(hasItem(DEFAULT_STATEMENT.toString())))
             .andExpect(jsonPath("$.[*].valid").value(hasItem(DEFAULT_VALID.booleanValue())))

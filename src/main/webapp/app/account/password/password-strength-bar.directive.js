@@ -11,7 +11,7 @@
             replace: true,
             restrict: 'E',
             template: '<div id="strength">' +
-                '<small data-translate="global.messages.validate.newpassword.strength">Password strength:</small>' +
+                '<small translate="global.messages.validate.newpassword.strength">Password strength:</small>' +
                 '<ul id="strengthBar">' +
                 '<li class="point"></li><li class="point"></li><li class="point"></li><li class="point"></li><li class="point"></li>' +
                 '</ul>' +
@@ -47,10 +47,10 @@
                     _force += 2 * p.length + ((p.length >= 10) ? 1 : 0);
                     _force += _passedMatches * 10;
 
-                    // penalty (short password)
+                    // penality (short password)
                     _force = (p.length <= 6) ? Math.min(_force, 10) : _force;
 
-                    // penalty (poor variety of characters)
+                    // penality (poor variety of characters)
                     _force = (_passedMatches === 1) ? Math.min(_force, 10) : _force;
                     _force = (_passedMatches === 2) ? Math.min(_force, 20) : _force;
                     _force = (_passedMatches === 3) ? Math.min(_force, 40) : _force;
@@ -60,7 +60,7 @@
                 },
                 getColor: function (s) {
 
-                    var idx;
+                    var idx = 0;
                     if (s <= 10) {
                         idx = 0;
                     }

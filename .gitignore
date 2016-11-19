@@ -7,14 +7,13 @@
 ######################
 # Node
 ######################
-node/
-node_tmp/
-node_modules/
+/node/**
+/node_modules/**
 
 ######################
 # SASS
 ######################
-.sass-cache/
+.sass-cache/**
 
 ######################
 # Eclipse
@@ -22,15 +21,16 @@ node_modules/
 *.pydevproject
 .project
 .metadata
-tmp/
-tmp/**/*
+/bin/**
+/tmp/**
+/tmp/**/*
 *.tmp
 *.bak
 *.swp
 *~.nib
 local.properties
 .classpath
-.settings/
+.settings/**
 .loadpath
 /src/main/resources/rebel.xml
 
@@ -49,7 +49,7 @@ local.properties
 ######################
 # Intellij
 ######################
-.idea/
+.idea/**
 *.iml
 *.iws
 *.ipr
@@ -57,20 +57,15 @@ local.properties
 *.orig
 
 ######################
-# Visual Studio Code
-######################
-.vscode/
-
-######################
 # Maven
 ######################
-log/
-target/
+/log/**
+/target/**
 
 ######################
 # Gradle
 ######################
-.gradle/
+.gradle/**
 
 ######################
 # Package Files
@@ -105,9 +100,10 @@ Desktop.ini
 ######################
 # Directories
 ######################
-/build/
-/bin/
-/deploy/
+/build/**
+/bin/**
+/spring_loaded/**
+/deploy/**
 
 ######################
 # Logs

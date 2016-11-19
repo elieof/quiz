@@ -2,9 +2,7 @@ package com.clinkast.quiz.web.rest;
 
 import com.clinkast.quiz.security.jwt.JWTConfigurer;
 import com.clinkast.quiz.security.jwt.TokenProvider;
-import com.clinkast.quiz.web.rest.vm.LoginVM;
-
-import java.util.Collections;
+import com.clinkast.quiz.web.rest.dto.LoginDTO;
 
 import com.codahale.metrics.annotation.Timed;
 import org.springframework.http.HttpStatus;
@@ -30,22 +28,22 @@ public class UserJWTController {
     @Inject
     private AuthenticationManager authenticationManager;
 
-    @PostMapping("/authenticate")
+    @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     @Timed
-    public ResponseEntity<?> authorize(@Valid @RequestBody LoginVM loginVM, HttpServletResponse response) {
+    public ResponseEntity<?> authorize(@Valid @RequestBody LoginDTO loginDTO, HttpServletResponse response) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken(loginVM.getUsername(), loginVM.getPassword());
+            new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword());
 
         try {
             Authentication authentication = this.authenticationManager.authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            boolean rememberMe = (loginVM.isRememberMe() == null) ? false : loginVM.isRememberMe();
+            boolean rememberMe = (loginDTO.isRememberMe() == null) ? false : loginDTO.isRememberMe();
             String jwt = tokenProvider.createToken(authentication, rememberMe);
             response.addHeader(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer " + jwt);
             return ResponseEntity.ok(new JWTToken(jwt));
         } catch (AuthenticationException exception) {
-            return new ResponseEntity<>(Collections.singletonMap("AuthenticationException",exception.getLocalizedMessage()), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(exception.getLocalizedMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 }

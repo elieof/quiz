@@ -1,17 +1,21 @@
 package com.clinkast.quiz.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.clinkast.quiz.domain.Result;
 import com.clinkast.quiz.service.ResultService;
 import com.clinkast.quiz.web.rest.util.HeaderUtil;
 import com.clinkast.quiz.web.rest.util.PaginationUtil;
-import com.clinkast.quiz.service.dto.ResultDTO;
+import com.clinkast.quiz.web.rest.dto.ResultDTO;
+import com.clinkast.quiz.web.rest.mapper.ResultMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
@@ -37,7 +41,10 @@ public class ResultResource {
         
     @Inject
     private ResultService resultService;
-
+    
+    @Inject
+    private ResultMapper resultMapper;
+    
     /**
      * POST  /results : Create a new result.
      *
@@ -45,7 +52,9 @@ public class ResultResource {
      * @return the ResponseEntity with status 201 (Created) and with body the new resultDTO, or with status 400 (Bad Request) if the result has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PostMapping("/results")
+    @RequestMapping(value = "/results",
+        method = RequestMethod.POST,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<ResultDTO> createResult(@Valid @RequestBody ResultDTO resultDTO) throws URISyntaxException {
         log.debug("REST request to save Result : {}", resultDTO);
@@ -67,7 +76,9 @@ public class ResultResource {
      * or with status 500 (Internal Server Error) if the resultDTO couldnt be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PutMapping("/results")
+    @RequestMapping(value = "/results",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<ResultDTO> updateResult(@Valid @RequestBody ResultDTO resultDTO) throws URISyntaxException {
         log.debug("REST request to update Result : {}", resultDTO);
@@ -87,14 +98,17 @@ public class ResultResource {
      * @return the ResponseEntity with status 200 (OK) and the list of results in body
      * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
      */
-    @GetMapping("/results")
+    @RequestMapping(value = "/results",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Transactional(readOnly = true)
     public ResponseEntity<List<ResultDTO>> getAllResults(Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to get a page of Results");
-        Page<ResultDTO> page = resultService.findAll(pageable);
+        Page<Result> page = resultService.findAll(pageable); 
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/results");
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(resultMapper.resultsToResultDTOs(page.getContent()), headers, HttpStatus.OK);
     }
 
     /**
@@ -103,7 +117,9 @@ public class ResultResource {
      * @param id the id of the resultDTO to retrieve
      * @return the ResponseEntity with status 200 (OK) and with body the resultDTO, or with status 404 (Not Found)
      */
-    @GetMapping("/results/{id}")
+    @RequestMapping(value = "/results/{id}",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<ResultDTO> getResult(@PathVariable Long id) {
         log.debug("REST request to get Result : {}", id);
@@ -121,7 +137,9 @@ public class ResultResource {
      * @param id the id of the resultDTO to delete
      * @return the ResponseEntity with status 200 (OK)
      */
-    @DeleteMapping("/results/{id}")
+    @RequestMapping(value = "/results/{id}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<Void> deleteResult(@PathVariable Long id) {
         log.debug("REST request to delete Result : {}", id);
@@ -133,20 +151,20 @@ public class ResultResource {
      * SEARCH  /_search/results?query=:query : search for the result corresponding
      * to the query.
      *
-     * @param query the query of the result search 
-     * @param pageable the pagination information
+     * @param query the query of the result search
      * @return the result of the search
-     * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
      */
-    @GetMapping("/_search/results")
+    @RequestMapping(value = "/_search/results",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Transactional(readOnly = true)
     public ResponseEntity<List<ResultDTO>> searchResults(@RequestParam String query, Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to search for a page of Results for query {}", query);
-        Page<ResultDTO> page = resultService.search(query, pageable);
+        Page<Result> page = resultService.search(query, pageable);
         HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/results");
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(resultMapper.resultsToResultDTOs(page.getContent()), headers, HttpStatus.OK);
     }
-
 
 }

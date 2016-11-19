@@ -71,42 +71,9 @@
                     return $translate.refresh();
                 }],
                 entity: ['$stateParams', 'Quiz', function($stateParams, Quiz) {
-                    return Quiz.get({id : $stateParams.id}).$promise;
-                }],
-                previousState: ["$state", function ($state) {
-                    var currentStateData = {
-                        name: $state.current.name || 'quiz',
-                        params: $state.params,
-                        url: $state.href($state.current.name, $state.params)
-                    };
-                    return currentStateData;
+                    return Quiz.get({id : $stateParams.id});
                 }]
             }
-        })
-        .state('quiz-detail.edit', {
-            parent: 'quiz-detail',
-            url: '/detail/edit',
-            data: {
-                authorities: ['ROLE_USER']
-            },
-            onEnter: ['$stateParams', '$state', '$uibModal', function($stateParams, $state, $uibModal) {
-                $uibModal.open({
-                    templateUrl: 'app/entities/quiz/quiz-dialog.html',
-                    controller: 'QuizDialogController',
-                    controllerAs: 'vm',
-                    backdrop: 'static',
-                    size: 'lg',
-                    resolve: {
-                        entity: ['Quiz', function(Quiz) {
-                            return Quiz.get({id : $stateParams.id}).$promise;
-                        }]
-                    }
-                }).result.then(function() {
-                    $state.go('^', {}, { reload: false });
-                }, function() {
-                    $state.go('^');
-                });
-            }]
         })
         .state('quiz.new', {
             parent: 'quiz',
@@ -131,7 +98,7 @@
                         }
                     }
                 }).result.then(function() {
-                    $state.go('quiz', null, { reload: 'quiz' });
+                    $state.go('quiz', null, { reload: true });
                 }, function() {
                     $state.go('quiz');
                 });
@@ -152,11 +119,11 @@
                     size: 'lg',
                     resolve: {
                         entity: ['Quiz', function(Quiz) {
-                            return Quiz.get({id : $stateParams.id}).$promise;
+                            return Quiz.get({id : $stateParams.id});
                         }]
                     }
                 }).result.then(function() {
-                    $state.go('quiz', null, { reload: 'quiz' });
+                    $state.go('quiz', null, { reload: true });
                 }, function() {
                     $state.go('^');
                 });
@@ -176,11 +143,11 @@
                     size: 'md',
                     resolve: {
                         entity: ['Quiz', function(Quiz) {
-                            return Quiz.get({id : $stateParams.id}).$promise;
+                            return Quiz.get({id : $stateParams.id});
                         }]
                     }
                 }).result.then(function() {
-                    $state.go('quiz', null, { reload: 'quiz' });
+                    $state.go('quiz', null, { reload: true });
                 }, function() {
                     $state.go('^');
                 });

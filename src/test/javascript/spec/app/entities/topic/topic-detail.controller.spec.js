@@ -4,22 +4,20 @@ describe('Controller Tests', function() {
 
     describe('Topic Management Detail Controller', function() {
         var $scope, $rootScope;
-        var MockEntity, MockPreviousState, MockTopic;
+        var MockEntity, MockTopic;
         var createController;
 
         beforeEach(inject(function($injector) {
             $rootScope = $injector.get('$rootScope');
             $scope = $rootScope.$new();
             MockEntity = jasmine.createSpy('MockEntity');
-            MockPreviousState = jasmine.createSpy('MockPreviousState');
             MockTopic = jasmine.createSpy('MockTopic');
             
 
             var locals = {
                 '$scope': $scope,
                 '$rootScope': $rootScope,
-                'entity': MockEntity,
-                'previousState': MockPreviousState,
+                'entity': MockEntity ,
                 'Topic': MockTopic
             };
             createController = function() {

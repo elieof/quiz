@@ -11,6 +11,7 @@ describe('Proposition e2e test', function () {
 
     beforeAll(function () {
         browser.get('/');
+        browser.driver.wait(protractor.until.elementIsVisible(element(by.css('h1'))));
 
         accountMenu.click();
         login.click();
@@ -22,18 +23,14 @@ describe('Proposition e2e test', function () {
 
     it('should load Propositions', function () {
         entityMenu.click();
-        element.all(by.css('[ui-sref="proposition"]')).first().click().then(function() {
-            element.all(by.css('h2')).first().getAttribute('data-translate').then(function (value) {
-                expect(value).toMatch(/quizApp.proposition.home.title/);
-            });
+        element(by.css('[ui-sref="proposition"]')).click().then(function() {
+            expect(element.all(by.css('h2')).first().getText()).toMatch(/Propositions/);
         });
     });
 
     it('should load create Proposition dialog', function () {
         element(by.css('[ui-sref="proposition.new"]')).click().then(function() {
-            element(by.css('h4.modal-title')).getAttribute('data-translate').then(function (value) {
-                expect(value).toMatch(/quizApp.proposition.home.createOrEditLabel/);
-            });
+            expect(element(by.css('h4.modal-title')).getText()).toMatch(/Create or edit a Proposition/);
             element(by.css('button.close')).click();
         });
     });

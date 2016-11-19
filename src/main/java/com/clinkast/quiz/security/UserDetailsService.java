@@ -1,5 +1,6 @@
 package com.clinkast.quiz.security;
 
+import com.clinkast.quiz.domain.Authority;
 import com.clinkast.quiz.domain.User;
 import com.clinkast.quiz.repository.UserRepository;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class UserDetailsService implements org.springframework.security.core.use
     @Transactional
     public UserDetails loadUserByUsername(final String login) {
         log.debug("Authenticating {}", login);
-        String lowercaseLogin = login.toLowerCase(Locale.ENGLISH);
+        String lowercaseLogin = login.toLowerCase();
         Optional<User> userFromDatabase = userRepository.findOneByLogin(lowercaseLogin);
         return userFromDatabase.map(user -> {
             if (!user.getActivated()) {

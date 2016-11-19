@@ -18,7 +18,6 @@ spring:
         livereload:
             enabled: false
     datasource:
-        type: com.zaxxer.hikari.HikariDataSource
         url: jdbc:mysql://localhost:3306/quiz?useUnicode=true&characterEncoding=utf8&useSSL=false
         name:
         username: root
@@ -30,9 +29,9 @@ spring:
                 prepStmtCacheSqlLimit: 2048
                 useServerPrepStmts: true
     jpa:
-        database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+        database-platform: org.hibernate.dialect.MySQLInnoDBDialect
         database: MYSQL
-        show-sql: false
+        show_sql: false
         properties:
             hibernate.cache.use_second_level_cache: true
             hibernate.cache.use_query_cache: false
@@ -58,7 +57,6 @@ server:
     compression:
         enabled: true
         mime-types: text/html,text/xml,text/plain,text/css, application/javascript, application/json
-        min-response-size: 1024
 
 # ===================================================================
 # JHipster specific properties
@@ -69,25 +67,23 @@ jhipster:
         cache: # Used by the CachingHttpHeadersFilter
             timeToLiveInDays: 1461
     cache: # Hibernate 2nd level cache, used by CacheConfiguration
+        timeToLiveSeconds: 3600
         ehcache:
             maxBytesLocalHeap: 256M
-    security:
-        authentication:
-            jwt:
-                secret: 1b37d90930f926eb0305fc3785324b2c135a260c
-                # Token is valid 24 hours
-                tokenValidityInSeconds: 86400
     mail: # specific JHipster mail property, for standard properties see MailProperties
         from: quiz@localhost
-        baseUrl: # keep empty to use the server's default URL
     metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
         jmx.enabled: true
+        spark:
+            enabled: false
+            host: localhost
+            port: 9999
         graphite:
             enabled: false
             host: localhost
             port: 2003
             prefix: quiz
-        logs: # Reports Dropwizard metrics in the logs
+        logs: # report metrics in the logs
             enabled: false
             reportFrequency: 60 # in seconds
     logging:

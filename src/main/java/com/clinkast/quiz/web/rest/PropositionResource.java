@@ -1,17 +1,21 @@
 package com.clinkast.quiz.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.clinkast.quiz.domain.Proposition;
 import com.clinkast.quiz.service.PropositionService;
 import com.clinkast.quiz.web.rest.util.HeaderUtil;
 import com.clinkast.quiz.web.rest.util.PaginationUtil;
-import com.clinkast.quiz.service.dto.PropositionDTO;
+import com.clinkast.quiz.web.rest.dto.PropositionDTO;
+import com.clinkast.quiz.web.rest.mapper.PropositionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
@@ -37,7 +41,10 @@ public class PropositionResource {
         
     @Inject
     private PropositionService propositionService;
-
+    
+    @Inject
+    private PropositionMapper propositionMapper;
+    
     /**
      * POST  /propositions : Create a new proposition.
      *
@@ -45,7 +52,9 @@ public class PropositionResource {
      * @return the ResponseEntity with status 201 (Created) and with body the new propositionDTO, or with status 400 (Bad Request) if the proposition has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PostMapping("/propositions")
+    @RequestMapping(value = "/propositions",
+        method = RequestMethod.POST,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<PropositionDTO> createProposition(@Valid @RequestBody PropositionDTO propositionDTO) throws URISyntaxException {
         log.debug("REST request to save Proposition : {}", propositionDTO);
@@ -67,7 +76,9 @@ public class PropositionResource {
      * or with status 500 (Internal Server Error) if the propositionDTO couldnt be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PutMapping("/propositions")
+    @RequestMapping(value = "/propositions",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<PropositionDTO> updateProposition(@Valid @RequestBody PropositionDTO propositionDTO) throws URISyntaxException {
         log.debug("REST request to update Proposition : {}", propositionDTO);
@@ -87,14 +98,17 @@ public class PropositionResource {
      * @return the ResponseEntity with status 200 (OK) and the list of propositions in body
      * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
      */
-    @GetMapping("/propositions")
+    @RequestMapping(value = "/propositions",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Transactional(readOnly = true)
     public ResponseEntity<List<PropositionDTO>> getAllPropositions(Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to get a page of Propositions");
-        Page<PropositionDTO> page = propositionService.findAll(pageable);
+        Page<Proposition> page = propositionService.findAll(pageable); 
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/propositions");
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(propositionMapper.propositionsToPropositionDTOs(page.getContent()), headers, HttpStatus.OK);
     }
 
     /**
@@ -103,7 +117,9 @@ public class PropositionResource {
      * @param id the id of the propositionDTO to retrieve
      * @return the ResponseEntity with status 200 (OK) and with body the propositionDTO, or with status 404 (Not Found)
      */
-    @GetMapping("/propositions/{id}")
+    @RequestMapping(value = "/propositions/{id}",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<PropositionDTO> getProposition(@PathVariable Long id) {
         log.debug("REST request to get Proposition : {}", id);
@@ -121,7 +137,9 @@ public class PropositionResource {
      * @param id the id of the propositionDTO to delete
      * @return the ResponseEntity with status 200 (OK)
      */
-    @DeleteMapping("/propositions/{id}")
+    @RequestMapping(value = "/propositions/{id}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<Void> deleteProposition(@PathVariable Long id) {
         log.debug("REST request to delete Proposition : {}", id);
@@ -133,20 +151,20 @@ public class PropositionResource {
      * SEARCH  /_search/propositions?query=:query : search for the proposition corresponding
      * to the query.
      *
-     * @param query the query of the proposition search 
-     * @param pageable the pagination information
+     * @param query the query of the proposition search
      * @return the result of the search
-     * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
      */
-    @GetMapping("/_search/propositions")
+    @RequestMapping(value = "/_search/propositions",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Transactional(readOnly = true)
     public ResponseEntity<List<PropositionDTO>> searchPropositions(@RequestParam String query, Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to search for a page of Propositions for query {}", query);
-        Page<PropositionDTO> page = propositionService.search(query, pageable);
+        Page<Proposition> page = propositionService.search(query, pageable);
         HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/propositions");
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(propositionMapper.propositionsToPropositionDTOs(page.getContent()), headers, HttpStatus.OK);
     }
-
 
 }

@@ -1,14 +1,16 @@
 package com.clinkast.quiz.web.rest;
 
-import com.clinkast.quiz.config.Constants;
 import com.codahale.metrics.annotation.Timed;
+import com.clinkast.quiz.domain.Authority;
 import com.clinkast.quiz.domain.User;
+import com.clinkast.quiz.repository.AuthorityRepository;
 import com.clinkast.quiz.repository.UserRepository;
 import com.clinkast.quiz.repository.search.UserSearchRepository;
 import com.clinkast.quiz.security.AuthoritiesConstants;
 import com.clinkast.quiz.service.MailService;
 import com.clinkast.quiz.service.UserService;
-import com.clinkast.quiz.web.rest.vm.ManagedUserVM;
+import com.clinkast.quiz.web.rest.dto.ManagedUserDTO;
+import com.clinkast.quiz.web.rest.dto.UserDTO;
 import com.clinkast.quiz.web.rest.util.HeaderUtil;
 import com.clinkast.quiz.web.rest.util.PaginationUtil;
 import org.slf4j.Logger;
@@ -17,8 +19,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
@@ -37,11 +41,11 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
  * <p>This class accesses the User entity, and needs to fetch its collection of authorities.</p>
  * <p>
  * For a normal use-case, it would be better to have an eager relationship between User and Authority,
- * and send everything to the client side: there would be no View Model and DTO, a lot less code, and an outer-join
+ * and send everything to the client side: there would be no DTO, a lot less code, and an outer-join
  * which would be good for performance.
  * </p>
  * <p>
- * We use a View Model and a DTO for 3 reasons:
+ * We use a DTO for 3 reasons:
  * <ul>
  * <li>We want to keep a lazy association between the user and the authorities, because people will
  * quite often do relationships with the user, and we don't want them to get the authorities all
@@ -67,6 +71,10 @@ public class UserResource {
     @Inject
     private MailService mailService;
 
+
+    @Inject
+    private AuthorityRepository authorityRepository;
+
     @Inject
     private UserService userService;
 
@@ -81,28 +89,28 @@ public class UserResource {
      * The user needs to be activated on creation.
      * </p>
      *
-     * @param managedUserVM the user to create
+     * @param managedUserDTO the user to create
      * @param request the HTTP request
      * @return the ResponseEntity with status 201 (Created) and with body the new user, or with status 400 (Bad Request) if the login or email is already in use
-     * @throws URISyntaxException if the Location URI syntax is incorrect
+     * @throws URISyntaxException if the Location URI syntaxt is incorrect
      */
-    @PostMapping("/users")
+    @RequestMapping(value = "/users",
+        method = RequestMethod.POST,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Secured(AuthoritiesConstants.ADMIN)
-    public ResponseEntity<?> createUser(@RequestBody ManagedUserVM managedUserVM, HttpServletRequest request) throws URISyntaxException {
-        log.debug("REST request to save User : {}", managedUserVM);
-
-        //Lowercase the user login before comparing with database
-        if (userRepository.findOneByLogin(managedUserVM.getLogin().toLowerCase()).isPresent()) {
+    public ResponseEntity<?> createUser(@RequestBody ManagedUserDTO managedUserDTO, HttpServletRequest request) throws URISyntaxException {
+        log.debug("REST request to save User : {}", managedUserDTO);
+        if (userRepository.findOneByLogin(managedUserDTO.getLogin()).isPresent()) {
             return ResponseEntity.badRequest()
                 .headers(HeaderUtil.createFailureAlert("userManagement", "userexists", "Login already in use"))
                 .body(null);
-        } else if (userRepository.findOneByEmail(managedUserVM.getEmail()).isPresent()) {
+        } else if (userRepository.findOneByEmail(managedUserDTO.getEmail()).isPresent()) {
             return ResponseEntity.badRequest()
                 .headers(HeaderUtil.createFailureAlert("userManagement", "emailexists", "Email already in use"))
                 .body(null);
         } else {
-            User newUser = userService.createUser(managedUserVM);
+            User newUser = userService.createUser(managedUserDTO);
             String baseUrl = request.getScheme() + // "http"
             "://" +                                // "://"
             request.getServerName() +              // "myhost"
@@ -119,50 +127,70 @@ public class UserResource {
     /**
      * PUT  /users : Updates an existing User.
      *
-     * @param managedUserVM the user to update
+     * @param managedUserDTO the user to update
      * @return the ResponseEntity with status 200 (OK) and with body the updated user,
      * or with status 400 (Bad Request) if the login or email is already in use,
-     * or with status 500 (Internal Server Error) if the user couldn't be updated
+     * or with status 500 (Internal Server Error) if the user couldnt be updated
      */
-    @PutMapping("/users")
+    @RequestMapping(value = "/users",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Transactional
     @Secured(AuthoritiesConstants.ADMIN)
-    public ResponseEntity<ManagedUserVM> updateUser(@RequestBody ManagedUserVM managedUserVM) {
-        log.debug("REST request to update User : {}", managedUserVM);
-        Optional<User> existingUser = userRepository.findOneByEmail(managedUserVM.getEmail());
-        if (existingUser.isPresent() && (!existingUser.get().getId().equals(managedUserVM.getId()))) {
+    public ResponseEntity<ManagedUserDTO> updateUser(@RequestBody ManagedUserDTO managedUserDTO) {
+        log.debug("REST request to update User : {}", managedUserDTO);
+        Optional<User> existingUser = userRepository.findOneByEmail(managedUserDTO.getEmail());
+        if (existingUser.isPresent() && (!existingUser.get().getId().equals(managedUserDTO.getId()))) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("userManagement", "emailexists", "E-mail already in use")).body(null);
         }
-        existingUser = userRepository.findOneByLogin(managedUserVM.getLogin().toLowerCase());
-        if (existingUser.isPresent() && (!existingUser.get().getId().equals(managedUserVM.getId()))) {
+        existingUser = userRepository.findOneByLogin(managedUserDTO.getLogin());
+        if (existingUser.isPresent() && (!existingUser.get().getId().equals(managedUserDTO.getId()))) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("userManagement", "userexists", "Login already in use")).body(null);
         }
-        userService.updateUser(managedUserVM.getId(), managedUserVM.getLogin(), managedUserVM.getFirstName(),
-            managedUserVM.getLastName(), managedUserVM.getEmail(), managedUserVM.isActivated(),
-            managedUserVM.getLangKey(), managedUserVM.getAuthorities());
+        return userRepository
+            .findOneById(managedUserDTO.getId())
+            .map(user -> {
+                user.setLogin(managedUserDTO.getLogin());
+                user.setFirstName(managedUserDTO.getFirstName());
+                user.setLastName(managedUserDTO.getLastName());
+                user.setEmail(managedUserDTO.getEmail());
+                user.setActivated(managedUserDTO.isActivated());
+                user.setLangKey(managedUserDTO.getLangKey());
+                Set<Authority> authorities = user.getAuthorities();
+                authorities.clear();
+                managedUserDTO.getAuthorities().stream().forEach(
+                    authority -> authorities.add(authorityRepository.findOne(authority))
+                );
+                return ResponseEntity.ok()
+                    .headers(HeaderUtil.createAlert("userManagement.updated", managedUserDTO.getLogin()))
+                    .body(new ManagedUserDTO(userRepository
+                        .findOne(managedUserDTO.getId())));
+            })
+            .orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createAlert("userManagement.updated", managedUserVM.getLogin()))
-            .body(new ManagedUserVM(userService.getUserWithAuthorities(managedUserVM.getId())));
     }
 
     /**
      * GET  /users : get all users.
-     *
+     * 
      * @param pageable the pagination information
      * @return the ResponseEntity with status 200 (OK) and with body all users
-     * @throws URISyntaxException if the pagination headers couldn't be generated
+     * @throws URISyntaxException if the pagination headers couldnt be generated
      */
-    @GetMapping("/users")
+    @RequestMapping(value = "/users",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<List<ManagedUserVM>> getAllUsers(Pageable pageable)
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<ManagedUserDTO>> getAllUsers(Pageable pageable)
         throws URISyntaxException {
-        Page<User> page = userRepository.findAllWithAuthorities(pageable);
-        List<ManagedUserVM> managedUserVMs = page.getContent().stream()
-            .map(ManagedUserVM::new)
+        Page<User> page = userRepository.findAll(pageable);
+        List<ManagedUserDTO> managedUserDTOs = page.getContent().stream()
+            .map(ManagedUserDTO::new)
             .collect(Collectors.toList());
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/users");
-        return new ResponseEntity<>(managedUserVMs, headers, HttpStatus.OK);
+        return new ResponseEntity<>(managedUserDTOs, headers, HttpStatus.OK);
     }
 
     /**
@@ -171,28 +199,31 @@ public class UserResource {
      * @param login the login of the user to find
      * @return the ResponseEntity with status 200 (OK) and with body the "login" user, or with status 404 (Not Found)
      */
-    @GetMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
+    @RequestMapping(value = "/users/{login:[_'.@a-z0-9-]+}",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<ManagedUserVM> getUser(@PathVariable String login) {
+    public ResponseEntity<ManagedUserDTO> getUser(@PathVariable String login) {
         log.debug("REST request to get User : {}", login);
         return userService.getUserWithAuthoritiesByLogin(login)
-                .map(ManagedUserVM::new)
-                .map(managedUserVM -> new ResponseEntity<>(managedUserVM, HttpStatus.OK))
+                .map(ManagedUserDTO::new)
+                .map(managedUserDTO -> new ResponseEntity<>(managedUserDTO, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-
     /**
-     * DELETE /users/:login : delete the "login" User.
+     * DELETE  USER :login : delete the "login" User.
      *
      * @param login the login of the user to delete
      * @return the ResponseEntity with status 200 (OK)
      */
-    @DeleteMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
+    @RequestMapping(value = "/users/{login:[_'.@a-z0-9-]+}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Secured(AuthoritiesConstants.ADMIN)
     public ResponseEntity<Void> deleteUser(@PathVariable String login) {
         log.debug("REST request to delete User: {}", login);
-        userService.deleteUser(login);
+        userService.deleteUserInformation(login);
         return ResponseEntity.ok().headers(HeaderUtil.createAlert( "userManagement.deleted", login)).build();
     }
 
@@ -203,7 +234,9 @@ public class UserResource {
      * @param query the query to search
      * @return the result of the search
      */
-    @GetMapping("/_search/users/{query}")
+    @RequestMapping(value = "/_search/users/{query}",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public List<User> search(@PathVariable String query) {
         return StreamSupport

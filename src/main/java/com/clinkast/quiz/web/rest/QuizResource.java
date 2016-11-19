@@ -1,17 +1,21 @@
 package com.clinkast.quiz.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.clinkast.quiz.domain.Quiz;
 import com.clinkast.quiz.service.QuizService;
 import com.clinkast.quiz.web.rest.util.HeaderUtil;
 import com.clinkast.quiz.web.rest.util.PaginationUtil;
-import com.clinkast.quiz.service.dto.QuizDTO;
+import com.clinkast.quiz.web.rest.dto.QuizDTO;
+import com.clinkast.quiz.web.rest.mapper.QuizMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
@@ -36,7 +40,10 @@ public class QuizResource {
         
     @Inject
     private QuizService quizService;
-
+    
+    @Inject
+    private QuizMapper quizMapper;
+    
     /**
      * POST  /quizzes : Create a new quiz.
      *
@@ -44,7 +51,9 @@ public class QuizResource {
      * @return the ResponseEntity with status 201 (Created) and with body the new quizDTO, or with status 400 (Bad Request) if the quiz has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PostMapping("/quizzes")
+    @RequestMapping(value = "/quizzes",
+        method = RequestMethod.POST,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<QuizDTO> createQuiz(@RequestBody QuizDTO quizDTO) throws URISyntaxException {
         log.debug("REST request to save Quiz : {}", quizDTO);
@@ -66,7 +75,9 @@ public class QuizResource {
      * or with status 500 (Internal Server Error) if the quizDTO couldnt be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PutMapping("/quizzes")
+    @RequestMapping(value = "/quizzes",
+        method = RequestMethod.PUT,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<QuizDTO> updateQuiz(@RequestBody QuizDTO quizDTO) throws URISyntaxException {
         log.debug("REST request to update Quiz : {}", quizDTO);
@@ -86,14 +97,17 @@ public class QuizResource {
      * @return the ResponseEntity with status 200 (OK) and the list of quizzes in body
      * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
      */
-    @GetMapping("/quizzes")
+    @RequestMapping(value = "/quizzes",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Transactional(readOnly = true)
     public ResponseEntity<List<QuizDTO>> getAllQuizzes(Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to get a page of Quizzes");
-        Page<QuizDTO> page = quizService.findAll(pageable);
+        Page<Quiz> page = quizService.findAll(pageable); 
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/quizzes");
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(quizMapper.quizzesToQuizDTOs(page.getContent()), headers, HttpStatus.OK);
     }
 
     /**
@@ -102,7 +116,9 @@ public class QuizResource {
      * @param id the id of the quizDTO to retrieve
      * @return the ResponseEntity with status 200 (OK) and with body the quizDTO, or with status 404 (Not Found)
      */
-    @GetMapping("/quizzes/{id}")
+    @RequestMapping(value = "/quizzes/{id}",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<QuizDTO> getQuiz(@PathVariable Long id) {
         log.debug("REST request to get Quiz : {}", id);
@@ -120,7 +136,9 @@ public class QuizResource {
      * @param id the id of the quizDTO to delete
      * @return the ResponseEntity with status 200 (OK)
      */
-    @DeleteMapping("/quizzes/{id}")
+    @RequestMapping(value = "/quizzes/{id}",
+        method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<Void> deleteQuiz(@PathVariable Long id) {
         log.debug("REST request to delete Quiz : {}", id);
@@ -132,20 +150,20 @@ public class QuizResource {
      * SEARCH  /_search/quizzes?query=:query : search for the quiz corresponding
      * to the query.
      *
-     * @param query the query of the quiz search 
-     * @param pageable the pagination information
+     * @param query the query of the quiz search
      * @return the result of the search
-     * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
      */
-    @GetMapping("/_search/quizzes")
+    @RequestMapping(value = "/_search/quizzes",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Transactional(readOnly = true)
     public ResponseEntity<List<QuizDTO>> searchQuizzes(@RequestParam String query, Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to search for a page of Quizzes for query {}", query);
-        Page<QuizDTO> page = quizService.search(query, pageable);
+        Page<Quiz> page = quizService.search(query, pageable);
         HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/quizzes");
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(quizMapper.quizzesToQuizDTOs(page.getContent()), headers, HttpStatus.OK);
     }
-
 
 }

@@ -23,14 +23,14 @@ public class ExceptionTranslator {
     @ExceptionHandler(ConcurrencyFailureException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     @ResponseBody
-    public ErrorVM processConcurencyError(ConcurrencyFailureException ex) {
-        return new ErrorVM(ErrorConstants.ERR_CONCURRENCY_FAILURE);
+    public ErrorDTO processConcurencyError(ConcurrencyFailureException ex) {
+        return new ErrorDTO(ErrorConstants.ERR_CONCURRENCY_FAILURE);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ErrorVM processValidationError(MethodArgumentNotValidException ex) {
+    public ErrorDTO processValidationError(MethodArgumentNotValidException ex) {
         BindingResult result = ex.getBindingResult();
         List<FieldError> fieldErrors = result.getFieldErrors();
 
@@ -40,19 +40,19 @@ public class ExceptionTranslator {
     @ExceptionHandler(CustomParameterizedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ParameterizedErrorVM processParameterizedValidationError(CustomParameterizedException ex) {
-        return ex.getErrorVM();
+    public ParameterizedErrorDTO processParameterizedValidationError(CustomParameterizedException ex) {
+        return ex.getErrorDTO();
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
-    public ErrorVM processAccessDeniedException(AccessDeniedException e) {
-        return new ErrorVM(ErrorConstants.ERR_ACCESS_DENIED, e.getMessage());
+    public ErrorDTO processAccessDeniedExcpetion(AccessDeniedException e) {
+        return new ErrorDTO(ErrorConstants.ERR_ACCESS_DENIED, e.getMessage());
     }
 
-    private ErrorVM processFieldErrors(List<FieldError> fieldErrors) {
-        ErrorVM dto = new ErrorVM(ErrorConstants.ERR_VALIDATION);
+    private ErrorDTO processFieldErrors(List<FieldError> fieldErrors) {
+        ErrorDTO dto = new ErrorDTO(ErrorConstants.ERR_VALIDATION);
 
         for (FieldError fieldError : fieldErrors) {
             dto.add(fieldError.getObjectName(), fieldError.getField(), fieldError.getCode());
@@ -64,22 +64,22 @@ public class ExceptionTranslator {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-    public ErrorVM processMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
-        return new ErrorVM(ErrorConstants.ERR_METHOD_NOT_SUPPORTED, exception.getMessage());
+    public ErrorDTO processMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
+        return new ErrorDTO(ErrorConstants.ERR_METHOD_NOT_SUPPORTED, exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorVM> processRuntimeException(Exception ex) {
+    public ResponseEntity<ErrorDTO> processRuntimeException(Exception ex) throws Exception {
         BodyBuilder builder;
-        ErrorVM errorVM;
+        ErrorDTO errorDTO;
         ResponseStatus responseStatus = AnnotationUtils.findAnnotation(ex.getClass(), ResponseStatus.class);
         if (responseStatus != null) {
             builder = ResponseEntity.status(responseStatus.value());
-            errorVM = new ErrorVM("error." + responseStatus.value().value(), responseStatus.reason());
+            errorDTO = new ErrorDTO("error." + responseStatus.value().value(), responseStatus.reason());
         } else {
             builder = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            errorVM = new ErrorVM(ErrorConstants.ERR_INTERNAL_SERVER_ERROR, "Internal server error");
+            errorDTO = new ErrorDTO(ErrorConstants.ERR_INTERNAL_SERVER_ERROR, "Internal server error");
         }
-        return builder.body(errorVM);
+        return builder.body(errorDTO);
     }
 }

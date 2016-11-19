@@ -9,20 +9,15 @@
 
     function PropositionDeleteController($uibModalInstance, entity, Proposition) {
         var vm = this;
-
         vm.proposition = entity;
-        vm.clear = clear;
-        vm.confirmDelete = confirmDelete;
-
-        function clear () {
+        vm.clear = function() {
             $uibModalInstance.dismiss('cancel');
-        }
-
-        function confirmDelete (id) {
+        };
+        vm.confirmDelete = function (id) {
             Proposition.delete({id: id},
                 function () {
                     $uibModalInstance.close(true);
                 });
-        }
+        };
     }
 })();

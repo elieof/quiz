@@ -4,8 +4,8 @@ import com.clinkast.quiz.service.TopicService;
 import com.clinkast.quiz.domain.Topic;
 import com.clinkast.quiz.repository.TopicRepository;
 import com.clinkast.quiz.repository.search.TopicSearchRepository;
-import com.clinkast.quiz.service.dto.TopicDTO;
-import com.clinkast.quiz.service.mapper.TopicMapper;
+import com.clinkast.quiz.web.rest.dto.TopicDTO;
+import com.clinkast.quiz.web.rest.mapper.TopicMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -32,16 +32,16 @@ public class TopicServiceImpl implements TopicService{
     
     @Inject
     private TopicRepository topicRepository;
-
+    
     @Inject
     private TopicMapper topicMapper;
-
+    
     @Inject
     private TopicSearchRepository topicSearchRepository;
-
+    
     /**
      * Save a topic.
-     *
+     * 
      * @param topicDTO the entity to save
      * @return the persisted entity
      */
@@ -61,10 +61,10 @@ public class TopicServiceImpl implements TopicService{
      *  @return the list of entities
      */
     @Transactional(readOnly = true) 
-    public Page<TopicDTO> findAll(Pageable pageable) {
+    public Page<Topic> findAll(Pageable pageable) {
         log.debug("Request to get all Topics");
-        Page<Topic> result = topicRepository.findAll(pageable);
-        return result.map(topic -> topicMapper.topicToTopicDTO(topic));
+        Page<Topic> result = topicRepository.findAll(pageable); 
+        return result;
     }
 
     /**
@@ -83,7 +83,7 @@ public class TopicServiceImpl implements TopicService{
 
     /**
      *  Delete the  topic by id.
-     *
+     *  
      *  @param id the id of the entity
      */
     public void delete(Long id) {
@@ -99,9 +99,8 @@ public class TopicServiceImpl implements TopicService{
      *  @return the list of entities
      */
     @Transactional(readOnly = true)
-    public Page<TopicDTO> search(String query, Pageable pageable) {
+    public Page<Topic> search(String query, Pageable pageable) {
         log.debug("Request to search for a page of Topics for query {}", query);
-        Page<Topic> result = topicSearchRepository.search(queryStringQuery(query), pageable);
-        return result.map(topic -> topicMapper.topicToTopicDTO(topic));
+        return topicSearchRepository.search(queryStringQuery(query), pageable);
     }
 }

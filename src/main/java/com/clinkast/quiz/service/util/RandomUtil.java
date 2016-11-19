@@ -1,6 +1,6 @@
 package com.clinkast.quiz.service.util;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang.RandomStringUtils;
 
 /**
  * Utility class for generating random Strings.

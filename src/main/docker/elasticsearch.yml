@@ -2,7 +2,7 @@ version: '2'
 services:
     quiz-elasticsearch:
         container_name: quiz-elasticsearch
-        image: elasticsearch:2.4.1
+        image: elasticsearch:1.7.5
         # volumes:
         #     - ~/volumes/jhipster/quiz/elasticsearch/:/usr/share/elasticsearch/data/
         ports:

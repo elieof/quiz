@@ -1,35 +1,33 @@
 
 <div>
-    <h2><span data-translate="quizApp.proposition.detail.title">Proposition</span> {{vm.proposition.id}}</h2>
+    <h2><span translate="quizApp.proposition.detail.title">Proposition</span> {{vm.proposition.id}}</h2>
     <hr>
-    <jhi-alert-error></jhi-alert-error>
-    <dl class="dl-horizontal jh-entity-details">
-        <dt><span data-translate="quizApp.proposition.statement">Statement</span></dt>
+    <dl class="dl-horizontal">
+        <dt><span translate="quizApp.proposition.statement">Statement</dt></dt>
         <dd>
-            <span>{{vm.proposition.statement}}</span>
+            <span>{{vm.proposition.statement}}<span>
         </dd>
-        <dt><span data-translate="quizApp.proposition.valid">Valid</span></dt>
+        <hr>
+        <dt><span translate="quizApp.proposition.valid">Valid</dt></dt>
         <dd>
-            <span>{{vm.proposition.valid}}</span>
+            <span>{{vm.proposition.valid}}<span>
         </dd>
-        <dt><span data-translate="quizApp.proposition.explanation">Explanation</span></dt>
+        <hr>
+        <dt><span translate="quizApp.proposition.explanation">Explanation</dt></dt>
         <dd>
-            <span>{{vm.proposition.explanation}}</span>
+            <span>{{vm.proposition.explanation}}<span>
         </dd>
-        <dt><span data-translate="quizApp.proposition.question">Question</span></dt>
+        <hr>
+        <dt><span translate="quizApp.proposition.question">question</span></dt>
         <dd>
             <a ui-sref="question-detail({id:vm.proposition.questionId})">{{vm.proposition.questionId}}</a>
         </dd>
+        <hr>
     </dl>
 
     <button type="submit"
-            ui-sref="{{ vm.previousState }}"
+            onclick="window.history.back()"
             class="btn btn-info">
-        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span data-translate="entity.action.back"> Back</span>
-    </button>
-
-    <button type="button" ui-sref="proposition-detail.edit({id:vm.proposition.id})" class="btn btn-primary">
-        <span class="glyphicon glyphicon-pencil"></span>
-        <span class="hidden-xs hidden-sm" data-translate="entity.action.edit"> Edit</span>
+        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span translate="entity.action.back"> Back</span>
     </button>
 </div>

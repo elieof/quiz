@@ -3,7 +3,6 @@ package com.clinkast.quiz.config;
 import com.clinkast.quiz.security.*;
 import com.clinkast.quiz.security.jwt.*;
 
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
+
 
 import javax.inject.Inject;
 
@@ -42,14 +42,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Inject
-    public void configureGlobal(AuthenticationManagerBuilder auth) {
-        try {
-            auth
-                .userDetailsService(userDetailsService)
-                    .passwordEncoder(passwordEncoder());
-        } catch (Exception e) {
-            throw new BeanInitializationException("Security configuration failed", e);
-        }
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+            .userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder());
     }
 
     @Override
@@ -85,12 +81,26 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/api/authenticate").permitAll()
             .antMatchers("/api/account/reset_password/init").permitAll()
             .antMatchers("/api/account/reset_password/finish").permitAll()
-            .antMatchers("/api/profile-info").permitAll()
+            .antMatchers("/api/logs/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/api/audits/**").hasAuthority(AuthoritiesConstants.ADMIN)
             .antMatchers("/api/**").authenticated()
-            .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/metrics/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/health/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/trace/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/dump/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/shutdown/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/beans/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/configprops/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/info/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/autoconfig/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/env/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/mappings/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/liquibase/**").hasAuthority(AuthoritiesConstants.ADMIN)
             .antMatchers("/v2/api-docs/**").permitAll()
-            .antMatchers("/swagger-resources/configuration/ui").permitAll()
+            .antMatchers("/configuration/security").permitAll()
+            .antMatchers("/configuration/ui").permitAll()
             .antMatchers("/swagger-ui/index.html").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/protected/**").authenticated() 
         .and()
             .apply(securityConfigurerAdapter());
 

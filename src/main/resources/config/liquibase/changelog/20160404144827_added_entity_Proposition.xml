@@ -16,7 +16,7 @@
     <!--
         Added the entity Proposition.
     -->
-    <changeSet id="20160404144827-1" author="jhipster">
+    <changeSet id="20160404144827" author="jhipster">
         <createTable tableName="proposition">
             <column name="id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>
@@ -33,12 +33,15 @@
                 <constraints nullable="true" />
             </column>
             
-            <column name="question_id" type="bigint">
-                <constraints nullable="true" />
-            </column>
-
+            <column name="question_id" type="bigint"/>
             <!-- jhipster-needle-liquibase-add-column - Jhipster will add columns here, do not remove-->
         </createTable>
         
+        <addForeignKeyConstraint baseColumnNames="question_id"
+                                 baseTableName="proposition"
+                                 constraintName="fk_proposition_question_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="question"/>
+
     </changeSet>
 </databaseChangeLog>

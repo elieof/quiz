@@ -1,7 +1,6 @@
 package com.clinkast.quiz;
 
 import com.clinkast.quiz.config.Constants;
-import com.clinkast.quiz.config.DefaultProfileUtil;
 import com.clinkast.quiz.config.JHipsterProperties;
 
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.SimpleCommandLinePropertySource;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -40,15 +40,19 @@ public class QuizApp {
      */
     @PostConstruct
     public void initApplication() {
-        log.info("Running with Spring profile(s) : {}", Arrays.toString(env.getActiveProfiles()));
-        Collection<String> activeProfiles = Arrays.asList(env.getActiveProfiles());
-        if (activeProfiles.contains(Constants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(Constants.SPRING_PROFILE_PRODUCTION)) {
-            log.error("You have misconfigured your application! It should not run " +
-                "with both the 'dev' and 'prod' profiles at the same time.");
-        }
-        if (activeProfiles.contains(Constants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(Constants.SPRING_PROFILE_CLOUD)) {
-            log.error("You have misconfigured your application! It should not" +
-                "run with both the 'dev' and 'cloud' profiles at the same time.");
+        if (env.getActiveProfiles().length == 0) {
+            log.warn("No Spring profile configured, running with default configuration");
+        } else {
+            log.info("Running with Spring profile(s) : {}", Arrays.toString(env.getActiveProfiles()));
+            Collection<String> activeProfiles = Arrays.asList(env.getActiveProfiles());
+            if (activeProfiles.contains(Constants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(Constants.SPRING_PROFILE_PRODUCTION)) {
+                log.error("You have misconfigured your application! " +
+                    "It should not run with both the 'dev' and 'prod' profiles at the same time.");
+            }
+            if (activeProfiles.contains(Constants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(Constants.SPRING_PROFILE_CLOUD)) {
+                log.error("You have misconfigured your application! " +
+                    "It should not run with both the 'dev' and 'cloud' profiles at the same time.");
+            }
         }
     }
 
@@ -60,16 +64,28 @@ public class QuizApp {
      */
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(QuizApp.class);
-        DefaultProfileUtil.addDefaultProfile(app);
+        SimpleCommandLinePropertySource source = new SimpleCommandLinePropertySource(args);
+        addDefaultProfile(app, source);
         Environment env = app.run(args).getEnvironment();
         log.info("\n----------------------------------------------------------\n\t" +
                 "Application '{}' is running! Access URLs:\n\t" +
-                "Local: \t\thttp://localhost:{}\n\t" +
+                "Local: \t\thttp://127.0.0.1:{}\n\t" +
                 "External: \thttp://{}:{}\n----------------------------------------------------------",
             env.getProperty("spring.application.name"),
             env.getProperty("server.port"),
             InetAddress.getLocalHost().getHostAddress(),
             env.getProperty("server.port"));
 
+    }
+
+    /**
+     * If no profile has been configured, set by default the "dev" profile.
+     */
+    private static void addDefaultProfile(SpringApplication app, SimpleCommandLinePropertySource source) {
+        if (!source.containsProperty("spring.profiles.active") &&
+                !System.getenv().containsKey("SPRING_PROFILES_ACTIVE")) {
+
+            app.setAdditionalProfiles(Constants.SPRING_PROFILE_DEVELOPMENT);
+        }
     }
 }

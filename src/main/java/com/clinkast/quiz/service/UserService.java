@@ -5,10 +5,11 @@ import com.clinkast.quiz.domain.User;
 import com.clinkast.quiz.repository.AuthorityRepository;
 import com.clinkast.quiz.repository.UserRepository;
 import com.clinkast.quiz.repository.search.UserSearchRepository;
-import com.clinkast.quiz.security.AuthoritiesConstants;
 import com.clinkast.quiz.security.SecurityUtils;
 import com.clinkast.quiz.service.util.RandomUtil;
-import com.clinkast.quiz.web.rest.vm.ManagedUserVM;
+import com.clinkast.quiz.web.rest.dto.ManagedUserDTO;
+import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,6 +29,7 @@ import java.util.*;
 public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(UserService.class);
+
 
     @Inject
     private PasswordEncoder passwordEncoder;
@@ -83,11 +85,11 @@ public class UserService {
             });
     }
 
-    public User createUser(String login, String password, String firstName, String lastName, String email,
+    public User createUserInformation(String login, String password, String firstName, String lastName, String email,
         String langKey) {
 
         User newUser = new User();
-        Authority authority = authorityRepository.findOne(AuthoritiesConstants.USER);
+        Authority authority = authorityRepository.findOne("ROLE_USER");
         Set<Authority> authorities = new HashSet<>();
         String encryptedPassword = passwordEncoder.encode(password);
         newUser.setLogin(login);
@@ -109,20 +111,20 @@ public class UserService {
         return newUser;
     }
 
-    public User createUser(ManagedUserVM managedUserVM) {
+    public User createUser(ManagedUserDTO managedUserDTO) {
         User user = new User();
-        user.setLogin(managedUserVM.getLogin());
-        user.setFirstName(managedUserVM.getFirstName());
-        user.setLastName(managedUserVM.getLastName());
-        user.setEmail(managedUserVM.getEmail());
-        if (managedUserVM.getLangKey() == null) {
+        user.setLogin(managedUserDTO.getLogin());
+        user.setFirstName(managedUserDTO.getFirstName());
+        user.setLastName(managedUserDTO.getLastName());
+        user.setEmail(managedUserDTO.getEmail());
+        if (managedUserDTO.getLangKey() == null) {
             user.setLangKey("fr"); // default language
         } else {
-            user.setLangKey(managedUserVM.getLangKey());
+            user.setLangKey(managedUserDTO.getLangKey());
         }
-        if (managedUserVM.getAuthorities() != null) {
+        if (managedUserDTO.getAuthorities() != null) {
             Set<Authority> authorities = new HashSet<>();
-            managedUserVM.getAuthorities().stream().forEach(
+            managedUserDTO.getAuthorities().stream().forEach(
                 authority -> authorities.add(authorityRepository.findOne(authority))
             );
             user.setAuthorities(authorities);
@@ -138,7 +140,7 @@ public class UserService {
         return user;
     }
 
-    public void updateUser(String firstName, String lastName, String email, String langKey) {
+    public void updateUserInformation(String firstName, String lastName, String email, String langKey) {
         userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin()).ifPresent(u -> {
             u.setFirstName(firstName);
             u.setLastName(lastName);
@@ -150,28 +152,7 @@ public class UserService {
         });
     }
 
-    public void updateUser(Long id, String login, String firstName, String lastName, String email,
-        boolean activated, String langKey, Set<String> authorities) {
-
-        Optional.of(userRepository
-            .findOne(id))
-            .ifPresent(u -> {
-                u.setLogin(login);
-                u.setFirstName(firstName);
-                u.setLastName(lastName);
-                u.setEmail(email);
-                u.setActivated(activated);
-                u.setLangKey(langKey);
-                Set<Authority> managedAuthorities = u.getAuthorities();
-                managedAuthorities.clear();
-                authorities.stream().forEach(
-                    authority -> managedAuthorities.add(authorityRepository.findOne(authority))
-                );
-                log.debug("Changed Information for User: {}", u);
-            });
-    }
-
-    public void deleteUser(String login) {
+    public void deleteUserInformation(String login) {
         userRepository.findOneByLogin(login).ifPresent(u -> {
             userRepository.delete(u);
             userSearchRepository.delete(u);
@@ -205,15 +186,10 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User getUserWithAuthorities() {
-        Optional<User> optionalUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin());
-        User user = null;
-        if (optionalUser.isPresent()) {
-          user = optionalUser.get();
-            user.getAuthorities().size(); // eagerly load the association
-         }
-         return user;
+        User user = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin()).get();
+        user.getAuthorities().size(); // eagerly load the association
+        return user;
     }
-
 
     /**
      * Not activated users should be automatically deleted after 3 days.

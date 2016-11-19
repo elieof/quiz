@@ -1,19 +1,17 @@
 package com.clinkast.quiz.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-
-import com.clinkast.quiz.config.JHipsterProperties;
+import com.clinkast.quiz.domain.Authority;
 import com.clinkast.quiz.domain.User;
 import com.clinkast.quiz.repository.UserRepository;
 import com.clinkast.quiz.security.SecurityUtils;
 import com.clinkast.quiz.service.MailService;
 import com.clinkast.quiz.service.UserService;
-import com.clinkast.quiz.service.dto.UserDTO;
-import com.clinkast.quiz.web.rest.vm.KeyAndPasswordVM;
-import com.clinkast.quiz.web.rest.vm.ManagedUserVM;
+import com.clinkast.quiz.web.rest.dto.KeyAndPasswordDTO;
+import com.clinkast.quiz.web.rest.dto.UserDTO;
 import com.clinkast.quiz.web.rest.util.HeaderUtil;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -35,9 +35,6 @@ import java.util.*;
 public class AccountResource {
 
     private final Logger log = LoggerFactory.getLogger(AccountResource.class);
-
-    @Inject
-    private JHipsterProperties jHipsterProperties;
 
     @Inject
     private UserRepository userRepository;
@@ -51,38 +48,33 @@ public class AccountResource {
     /**
      * POST  /register : register the user.
      *
-     * @param managedUserVM the managed user View Model
+     * @param userDTO the user DTO
      * @param request the HTTP request
-     * @return the ResponseEntity with status 201 (Created) if the user is registered or 400 (Bad Request) if the login or e-mail is already in use
+     * @return the ResponseEntity with status 201 (Created) if the user is registred or 400 (Bad Request) if the login or e-mail is already in use
      */
-    @PostMapping(path = "/register",
+    @RequestMapping(value = "/register",
+                    method = RequestMethod.POST,
                     produces={MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE})
     @Timed
-    public ResponseEntity<?> registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM, HttpServletRequest request) {
+    public ResponseEntity<?> registerAccount(@Valid @RequestBody UserDTO userDTO, HttpServletRequest request) {
 
         HttpHeaders textPlainHeaders = new HttpHeaders();
         textPlainHeaders.setContentType(MediaType.TEXT_PLAIN);
 
-        return userRepository.findOneByLogin(managedUserVM.getLogin().toLowerCase())
+        return userRepository.findOneByLogin(userDTO.getLogin())
             .map(user -> new ResponseEntity<>("login already in use", textPlainHeaders, HttpStatus.BAD_REQUEST))
-            .orElseGet(() -> userRepository.findOneByEmail(managedUserVM.getEmail())
+            .orElseGet(() -> userRepository.findOneByEmail(userDTO.getEmail())
                 .map(user -> new ResponseEntity<>("e-mail address already in use", textPlainHeaders, HttpStatus.BAD_REQUEST))
                 .orElseGet(() -> {
-                    User user = userService
-                        .createUser(managedUserVM.getLogin(), managedUserVM.getPassword(),
-                            managedUserVM.getFirstName(), managedUserVM.getLastName(),
-                            managedUserVM.getEmail().toLowerCase(), managedUserVM.getLangKey());
-
-
-                    String baseUrl = jHipsterProperties.getMail().getBaseUrl();
-                    if (baseUrl.equals("")) {
-                        baseUrl = request.getScheme() + // "http"
-                        "://" +                         // "://"
-                        request.getServerName() +       // "myhost"
-                        ":" +                           // ":"
-                        request.getServerPort() +       // "80"
-                        request.getContextPath();       // "/myContextPath" or "" if deployed in root context
-                    }
+                    User user = userService.createUserInformation(userDTO.getLogin(), userDTO.getPassword(),
+                    userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail().toLowerCase(),
+                    userDTO.getLangKey());
+                    String baseUrl = request.getScheme() + // "http"
+                    "://" +                                // "://"
+                    request.getServerName() +              // "myhost"
+                    ":" +                                  // ":"
+                    request.getServerPort() +              // "80"
+                    request.getContextPath();              // "/myContextPath" or "" if deployed in root context
 
                     mailService.sendActivationEmail(user, baseUrl);
                     return new ResponseEntity<>(HttpStatus.CREATED);
@@ -96,7 +88,9 @@ public class AccountResource {
      * @param key the activation key
      * @return the ResponseEntity with status 200 (OK) and the activated user in body, or status 500 (Internal Server Error) if the user couldn't be activated
      */
-    @GetMapping("/activate")
+    @RequestMapping(value = "/activate",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<String> activateAccount(@RequestParam(value = "key") String key) {
         return userService.activateRegistration(key)
@@ -110,7 +104,9 @@ public class AccountResource {
      * @param request the HTTP request
      * @return the login if the user is authenticated
      */
-    @GetMapping("/authenticate")
+    @RequestMapping(value = "/authenticate",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public String isAuthenticated(HttpServletRequest request) {
         log.debug("REST request to check if the current user is authenticated");
@@ -122,7 +118,9 @@ public class AccountResource {
      *
      * @return the ResponseEntity with status 200 (OK) and the current user in body, or status 500 (Internal Server Error) if the user couldn't be returned
      */
-    @GetMapping("/account")
+    @RequestMapping(value = "/account",
+        method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<UserDTO> getAccount() {
         return Optional.ofNullable(userService.getUserWithAuthorities())
@@ -136,9 +134,11 @@ public class AccountResource {
      * @param userDTO the current user information
      * @return the ResponseEntity with status 200 (OK), or status 400 (Bad Request) or 500 (Internal Server Error) if the user couldn't be updated
      */
-    @PostMapping("/account")
+    @RequestMapping(value = "/account",
+        method = RequestMethod.POST,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<String> saveAccount(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<String> saveAccount(@RequestBody UserDTO userDTO) {
         Optional<User> existingUser = userRepository.findOneByEmail(userDTO.getEmail());
         if (existingUser.isPresent() && (!existingUser.get().getLogin().equalsIgnoreCase(userDTO.getLogin()))) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("user-management", "emailexists", "Email already in use")).body(null);
@@ -146,7 +146,7 @@ public class AccountResource {
         return userRepository
             .findOneByLogin(SecurityUtils.getCurrentUserLogin())
             .map(u -> {
-                userService.updateUser(userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail(),
+                userService.updateUserInformation(userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail(),
                     userDTO.getLangKey());
                 return new ResponseEntity<String>(HttpStatus.OK);
             })
@@ -159,7 +159,8 @@ public class AccountResource {
      * @param password the new password
      * @return the ResponseEntity with status 200 (OK), or status 400 (Bad Request) if the new password is not strong enough
      */
-    @PostMapping(path = "/account/change_password",
+    @RequestMapping(value = "/account/change_password",
+        method = RequestMethod.POST,
         produces = MediaType.TEXT_PLAIN_VALUE)
     @Timed
     public ResponseEntity<?> changePassword(@RequestBody String password) {
@@ -175,9 +176,10 @@ public class AccountResource {
      *
      * @param mail the mail of the user
      * @param request the HTTP request
-     * @return the ResponseEntity with status 200 (OK) if the e-mail was sent, or status 400 (Bad Request) if the e-mail address is not registered
+     * @return the ResponseEntity with status 200 (OK) if the e-mail was sent, or status 400 (Bad Request) if the e-mail address is not registred
      */
-    @PostMapping(path = "/account/reset_password/init",
+    @RequestMapping(value = "/account/reset_password/init",
+        method = RequestMethod.POST,
         produces = MediaType.TEXT_PLAIN_VALUE)
     @Timed
     public ResponseEntity<?> requestPasswordReset(@RequestBody String mail, HttpServletRequest request) {
@@ -201,10 +203,11 @@ public class AccountResource {
      * @return the ResponseEntity with status 200 (OK) if the password has been reset,
      * or status 400 (Bad Request) or 500 (Internal Server Error) if the password could not be reset
      */
-    @PostMapping(path = "/account/reset_password/finish",
+    @RequestMapping(value = "/account/reset_password/finish",
+        method = RequestMethod.POST,
         produces = MediaType.TEXT_PLAIN_VALUE)
     @Timed
-    public ResponseEntity<String> finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
+    public ResponseEntity<String> finishPasswordReset(@RequestBody KeyAndPasswordDTO keyAndPassword) {
         if (!checkPasswordLength(keyAndPassword.getNewPassword())) {
             return new ResponseEntity<>("Incorrect password", HttpStatus.BAD_REQUEST);
         }
@@ -215,7 +218,7 @@ public class AccountResource {
 
     private boolean checkPasswordLength(String password) {
         return (!StringUtils.isEmpty(password) &&
-            password.length() >= ManagedUserVM.PASSWORD_MIN_LENGTH &&
-            password.length() <= ManagedUserVM.PASSWORD_MAX_LENGTH);
+            password.length() >= UserDTO.PASSWORD_MIN_LENGTH &&
+            password.length() <= UserDTO.PASSWORD_MAX_LENGTH);
     }
 }

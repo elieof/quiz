@@ -4,8 +4,8 @@ import com.clinkast.quiz.service.ResultService;
 import com.clinkast.quiz.domain.Result;
 import com.clinkast.quiz.repository.ResultRepository;
 import com.clinkast.quiz.repository.search.ResultSearchRepository;
-import com.clinkast.quiz.service.dto.ResultDTO;
-import com.clinkast.quiz.service.mapper.ResultMapper;
+import com.clinkast.quiz.web.rest.dto.ResultDTO;
+import com.clinkast.quiz.web.rest.mapper.ResultMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -32,16 +32,16 @@ public class ResultServiceImpl implements ResultService{
     
     @Inject
     private ResultRepository resultRepository;
-
+    
     @Inject
     private ResultMapper resultMapper;
-
+    
     @Inject
     private ResultSearchRepository resultSearchRepository;
-
+    
     /**
      * Save a result.
-     *
+     * 
      * @param resultDTO the entity to save
      * @return the persisted entity
      */
@@ -61,10 +61,10 @@ public class ResultServiceImpl implements ResultService{
      *  @return the list of entities
      */
     @Transactional(readOnly = true) 
-    public Page<ResultDTO> findAll(Pageable pageable) {
+    public Page<Result> findAll(Pageable pageable) {
         log.debug("Request to get all Results");
-        Page<Result> result = resultRepository.findAll(pageable);
-        return result.map(result -> resultMapper.resultToResultDTO(result));
+        Page<Result> result = resultRepository.findAll(pageable); 
+        return result;
     }
 
     /**
@@ -83,7 +83,7 @@ public class ResultServiceImpl implements ResultService{
 
     /**
      *  Delete the  result by id.
-     *
+     *  
      *  @param id the id of the entity
      */
     public void delete(Long id) {
@@ -99,9 +99,8 @@ public class ResultServiceImpl implements ResultService{
      *  @return the list of entities
      */
     @Transactional(readOnly = true)
-    public Page<ResultDTO> search(String query, Pageable pageable) {
+    public Page<Result> search(String query, Pageable pageable) {
         log.debug("Request to search for a page of Results for query {}", query);
-        Page<Result> result = resultSearchRepository.search(queryStringQuery(query), pageable);
-        return result.map(result -> resultMapper.resultToResultDTO(result));
+        return resultSearchRepository.search(queryStringQuery(query), pageable);
     }
 }
